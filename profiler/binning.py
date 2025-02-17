@@ -1,10 +1,12 @@
 import numpy as np
-from datetime import datetime
 import time
+
+from IPython import embed
 
 def run(data, pmin:float=10, pstep:float=10, 
             pmax:float=200., pd:str='d', 
-            exclude='bad', useraw=False):
+            exclude='bad', 
+            add_vel:bool=True):
     """
     Bins oceanographic data in pressure or depth on the grid [pmin:pstep:pmax].
     
@@ -12,6 +14,7 @@ def run(data, pmin:float=10, pstep:float=10,
     -----------
     data : dict
         Dictionary containing oceanographic data with fields like time, lat, lon, etc.
+        The primary quantities are lists of np.ndarray
     pmin : float
         Minimum pressure/depth value
     pstep : float
@@ -22,8 +25,6 @@ def run(data, pmin:float=10, pstep:float=10,
         'p' for pressure or 'd' for depth binning
     exclude : str, optional
         'none', 'bad', or 'questionable' to specify which points to exclude
-    useraw : bool, optional
-        If True, use raw data fields (praw, sraw, etc.)
     
     Returns:
     --------
@@ -42,12 +43,15 @@ def run(data, pmin:float=10, pstep:float=10,
         'time': data['time'][:, 1],
         'lat': data['lat'][:, 1],
         'lon': data['lon'][:, 1],
+    }
+
+    if add_vel:
+        bindata.update({
         'u': data['u'],
         'v': data['v'],
         'tsurf': data['tsurf'],
         'usurf': data['usurf'],
-        'vsurf': data['vsurf']
-    }
+        'vsurf': data['vsurf']})
     
     # Set up pressure/depth grid
     if pd == 'p':
@@ -60,7 +64,7 @@ def run(data, pmin:float=10, pstep:float=10,
         raise ValueError("pd must be 'p' (pressure) or 'd' (depth)")
     
     # Set up raw/processed data string
-    pstrdata = f"{pstr}raw" if useraw else pstr
+    pstrdata = pstr
     
     # Set maximum flag based on exclude parameter
     if exclude.startswith('n'):
@@ -79,25 +83,31 @@ def run(data, pmin:float=10, pstep:float=10,
         bindata[field] = np.full((np_bins, nt), np.nan)
     
     # Bin the data
-    for n in range(nt):
+    for n in range(nt):  # Loop on profiles
         if data[pstrdata][n] is not None and len(data[pstrdata][n]) > 0:
-            ibin = np.round((data[pstrdata][n] - pmin) / pstep).astype(int)
-            
+            ibin = np.round((data[pstrdata][n] - pmin) / pstep)
+            # NaNs
+            ibin[np.isnan(ibin)] = -999999
+            ibin = ibin.astype(int)
+
+            # Loop on bins
             for m in range(np_bins):
                 try:
                     # Temperature
-                    qual_field = 'traw' if useraw else 't'
-                    data_field = 'traw' if useraw else 't'
+                    qual_field = 't'
+                    data_field = 't'
                     iit = (ibin == m) & (data['qual'][qual_field][n] < maxflag)
                     if np.any(iit):
-                        bindata['t'][m, n] = np.nanmean(data[data_field][n][iit])
+                        bindata['t'][m, n] = np.nanmean(
+                            data[data_field][n][iit])
                 except Exception as err:
-                    print(f"t {'raw' if useraw else 'bin'} index = [{m}, {n}]: {str(err)}")
+                    print(f"t {'bin'} index = [{m}, {n}]: {str(err)}")
+                    embed(header='104 of binning')
                 
                 try:
                     # Salinity and derived variables
-                    qual_field = 'sraw' if useraw else 's'
-                    data_field = 'sraw' if useraw else 's'
+                    qual_field = 's'
+                    data_field = 's'
                     iis = (ibin == m) & (data['qual'][qual_field][n] < maxflag)
                     ii = iit & iis
                     
@@ -105,10 +115,10 @@ def run(data, pmin:float=10, pstep:float=10,
                         bindata['s'][m, n] = np.nanmean(data[data_field][n][iis])
                     if np.any(ii):
                         for field in ['theta', 'sigma', 'rho']:
-                            field_raw = f"{field}raw" if useraw else field
+                            field_raw = field
                             bindata[field][m, n] = np.nanmean(data[field_raw][n][ii])
                 except Exception as err:
-                    print(f"binsolo: s {'raw' if useraw else 'bin'} index = [{m}, {n}]: {str(err)}")
+                    print(f"binsolo: s {'bin'} index = [{m}, {n}]: {str(err)}")
     
     # Add creation time
     bindata['bintime'] = int(time.time())
