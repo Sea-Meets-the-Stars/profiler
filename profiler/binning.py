@@ -102,7 +102,6 @@ def run(data, pmin:float=10, pstep:float=10,
                             data[data_field][n][iit])
                 except Exception as err:
                     print(f"t {'bin'} index = [{m}, {n}]: {str(err)}")
-                    embed(header='104 of binning')
                 
                 try:
                     # Salinity and derived variables
