@@ -2,7 +2,9 @@ import numpy as np
 from datetime import datetime
 import time
 
-def binsolo(data, pmin, pstep, pmax, pd, exclude='bad', useraw=False):
+def run(data, pmin:float=10, pstep:float=10, 
+            pmax:float=200., pd:str='d', 
+            exclude='bad', useraw=False):
     """
     Bins oceanographic data in pressure or depth on the grid [pmin:pstep:pmax].
     
