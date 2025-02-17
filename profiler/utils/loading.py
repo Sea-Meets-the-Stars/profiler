@@ -1,8 +1,3 @@
-""" Utilities for the IDG at Scripps
-    Dan Rudnick
-    Shuan Johnson
-"""
-
 import os
 import numpy as np
 
@@ -11,20 +6,28 @@ from cugn import utils as cugn_utils
 
 from IPython import embed
 
+
 def load_binned_data(profiler):
 
     """ Load the CTD data for Arcteryx """
-    mat_d = pymatreader.read_mat(profiler.datafile)
+    if os.path.splitext(profiler.datafile)[1][1:] == 'mat':
+        d_bin = pymatreader.read_mat(profiler.datafile)
+    elif os.path.splitext(profiler.datafile)[1][1:] == 'npz':
+        tmp = np.load(profiler.datafile, allow_pickle=True)
+        # Hack me
+        d_bin = dict(bindata=tmp)
+    else: 
+        raise IOError(f'Bad reader {profiler.reader}')
 
     # Scalars
     if not profiler.in_field:
         profiler.scalar_keys += ['x0', 'x1', 'y0', 'y1']
     for key in profiler.scalar_keys:
-        setattr(profiler, key, mat_d[profiler.base_key][key])
+        setattr(profiler, key, d_bin[profiler.base_key][key])
 
     # Depth arrays
     for key in profiler.depth_arrays:
-        setattr(profiler, key, mat_d[profiler.base_key][key])
+        setattr(profiler, key, d_bin[profiler.base_key][key])
 
     # Profile arrays
     #embed(header='30 of idg_utis')
@@ -33,21 +36,26 @@ def load_binned_data(profiler):
     for ss, key in enumerate(profiler.profile_arrays):
         # Set the mask from the first one
         if ss == 0:
-            gdi = np.isfinite(mat_d[profiler.base_key][key])
-        setattr(profiler, key, mat_d[profiler.base_key][key][gdi])
+            gdi = np.isfinite(d_bin[profiler.base_key][key])
+        setattr(profiler, key, d_bin[profiler.base_key][key][gdi])
 
     # Profile + depth
     if profiler.has_adcp and profiler.adcp_on: 
         profiler.profile_depth_arrays += ['udop', 'vdop', 
                                     'udopacross', 'udopalong']
     for key in profiler.profile_depth_arrays:
-        setattr(profiler, key, mat_d[profiler.base_key][key][:,gdi])
+        setattr(profiler, key, d_bin[profiler.base_key][key][:,gdi])
 
     if profiler.in_field:
         # Mission ID
         key = 'missid'
         profiler.profile_arrays += [key]
-        missid = int(os.path.basename(profiler.datafile).split('.')[0])
+        #embed(header='53 of loading')
+        if profiler.__class__.__name__ == 'EMApexData':
+            base = os.path.basename(profiler.datafile).split('.')[0]
+            missid = int(base.split('F')[1])
+        else:
+            missid = int(os.path.basename(profiler.datafile).split('.')[0])
         setattr(profiler, key, missid*np.ones_like(profiler.lat, dtype=int))
 
         # Generate dist and offset

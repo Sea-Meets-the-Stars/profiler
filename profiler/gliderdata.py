@@ -5,8 +5,8 @@ import glob
 import numpy as np
 import warnings
 
-from cugn import idg_utils
-from cugn import profiledata
+from profiler.utils import loading
+from profiler import profiledata
 
 from IPython import embed
 
@@ -86,7 +86,7 @@ class SprayData(profiledata.ADCPData):
                                           adcp_on=adcp_on)
 
             # Load
-            idg_utils.load_binned_data(self)
+            loading.load_binned_data(self)
 
         def __repr__(self):
             """ Return the representation of the CTDData object """

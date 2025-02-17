@@ -18,7 +18,8 @@ def process_em_apex_float(ifloat:dict):
     ifloat['s'] =  ifloat.pop('sa')
 
     # Replace time with time_prof!
-    ifloat['time'] =  ifloat.pop('time_prof')
+    #   And convert to Unix time
+    ifloat['time'] =  (ifloat.pop('time_prof') - 719529) * 86400
 
     # Depth
     ifloat['depth'] = np.zeros_like(ifloat['t'])
