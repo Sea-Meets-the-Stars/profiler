@@ -37,7 +37,7 @@ class ProfilerData:
     offset = None
 
     # Meta
-    missid:str = None
+    missid:int = None
     platform:str = None
     pi:str = None  # Principal Invesitgator
     pdict:dict = None # dict on the profiler

@@ -8,7 +8,8 @@ from scipy.interpolate import interp1d
 
 import pandas
 
-from cugn import utils as cugn_utils
+from profiler.utils import offsets
+#from cugn import utils as cugn_utils
 
 from IPython import embed
 
@@ -94,6 +95,10 @@ class ProfilerPairs:
         self.dS = None
         self.dT = None
 
+        # Calculate dists
+        self.calc_dist()
+
+        # Pair time
         self.generate_pairs(max_dist=max_dist, max_time=max_time,
                             from_scratch=from_scratch,
                             avoid_same_glider=avoid_same_glider)
@@ -122,6 +127,28 @@ class ProfilerPairs:
         sdict['config']['creation_date'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # Add created by
         sdict['config']['created_by'] = getpass.getuser()
+
+    def calc_dist(self):
+        """
+        Calculate the distance between the gliders
+        """
+        # Find max,min lat lon in the profilers
+        lat = np.concatenate([item.lat for item in self.pdata])
+        lon = np.concatenate([item.lon for item in self.pdata])
+        self.max_lat = np.max(lat)
+        self.min_lat = np.min(lat)
+        self.max_lon = np.max(lon)
+        self.min_lon = np.min(lon)
+        lonendpts = (self.min_lon, self.max_lon)
+        latendpts = (self.min_lat, self.max_lat)
+
+        # Calculate the distance from the line connecting those
+        for profiler in self.pdata:
+            dist, offset = offsets.calc_dist_offset(
+                profiler.lon, profiler.lat, (lonendpts, latendpts))
+            # Set
+            profiler.dist = dist
+            profiler.offset = offset
 
     def generate_pairs(self, max_dist:float=None, max_time:float=None,
                        from_scratch:bool=True, avoid_same_glider:bool=True):
@@ -153,7 +180,7 @@ class ProfilerPairs:
         # Generate missid arrays
         for pdata in self.pdata:
             setattr(pdata, 'missida', 
-                    np.array([str(pdata.missid)]*pdata.time.size))
+                    np.array([int(pdata.missid)]*pdata.time.size))
 
         # Time
         if max_time is not None:
@@ -213,16 +240,20 @@ class ProfilerPairs:
         """
         # Build up the data array from the pdata list
         if iz is None or iz >= 0:
-            if getattr(self.pdata[0], key).ndim >= 2:
-                # Find the minimum number of levels
-                minl = np.min([getattr(item, key).shape[0] for item in self.pdata])
-                # Concatenate
-                data = np.concatenate([getattr(item, key)[:minl,...] for item in self.pdata], axis=1)
-            else:
-                try:
-                    data = np.concatenate([getattr(item, key) for item in self.pdata])
-                except:
-                    embed(header='220 of profilepairs')
+            try:
+                if getattr(self.pdata[0], key).ndim >= 2:
+                    # Find the minimum number of levels
+                    minl = np.min([getattr(item, key).shape[0] for item in self.pdata])
+                    # Concatenate
+                    data = np.concatenate([getattr(item, key)[:minl,...] for item in self.pdata], axis=1)
+                else:
+                    try:
+                        data = np.concatenate([getattr(item, key) for item in self.pdata])
+                    except:
+                        embed(header='220 of profilepairs')
+            except:
+                embed(header='220 of profilepairs')
+                
 
 
         if ipair == 2:

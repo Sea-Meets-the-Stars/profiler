@@ -33,7 +33,7 @@ def load_emapex_infield(datafile:str, dataset:str, debug:bool=False):
         # Meta dict
         mdict = {}
         mdict['datafile'] = datafile
-        mdict['missid'] = ifloat
+        mdict['missid'] = int(ifloat[1:])
         #
         print(f"Working on float {ifloat}")
         float_dict, darrays = process_em_apex_float(d['E'][ifloat])

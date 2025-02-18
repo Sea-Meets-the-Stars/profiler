@@ -93,7 +93,7 @@ def load(profiler, bin_style:str, in_missid:int=None):
     if profiler.in_field:
         # Mission ID
         key = 'missid'
-        profiler.profile_arrays += [key]
+        #profiler.profile_arrays += [key]
         #embed(header='53 of loading')
         if profiler.__class__.__name__ == 'EMApexData':
             base = os.path.basename(profiler.datafile).split('.')[0]
