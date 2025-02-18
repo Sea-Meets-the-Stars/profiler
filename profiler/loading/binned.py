@@ -20,7 +20,7 @@ def set_profiler(profiler:"ProfilerData",
     if isinstance(data[key], xarray.core.dataarray.DataArray):
         idata = data[key].values
     elif isinstance(data[key], np.ndarray):
-        if bin_style == 'idg':
+        if bin_style in ['idg', 'triaxus']:
             idata = data[key].T
         else:
             idata = data[key]
@@ -56,6 +56,17 @@ def load(profiler, bin_style:str, in_missid:int=None):
         d_bin['t'] = d_bin['temp']
         d_bin['s'] = d_bin['SP']
         d_bin['SA'] = d_bin['SA']
+    elif bin_style == 'triaxus': # Triaxus
+        d = pymatreader.read_mat(profiler.datafile, 
+                                 verify_compressed_data_integrity=True)  # FAILED
+        d_bin = d['pr']
+        #embed(header='47 of binned')
+        d_bin['time'] = (1735689600 +  # This is Unix time for 2025-01-01 00:00:00 UTC
+            (d_bin['t'] * 86400)) # seconds
+        # Rename me + transpose
+        d_bin['t'] = d_bin['T']
+        d_bin['s'] = d_bin['S']
+        d_bin['sigma'] = d_bin['sigma_t']
     else: 
         raise IOError(f'Bad reader {profiler.reader}')
 
@@ -98,7 +109,7 @@ def load(profiler, bin_style:str, in_missid:int=None):
         if profiler.__class__.__name__ == 'EMApexData':
             base = os.path.basename(profiler.datafile).split('.')[0]
             missid = int(base.split('F')[1])
-        elif profiler.__class__.__name__ == 'VMPData':
+        elif profiler.__class__.__name__ in ['VMPData', 'TriaxusData']:
             missid = in_missid
         else:
             missid = int(os.path.basename(profiler.datafile).split('.')[0])
