@@ -32,9 +32,9 @@ def load_dataset(dataset:str):
 
         pDatas = []
         for dfile in dfiles:
+            sData =  SprayData.from_binned_file(
+                    dfiles, 'idg', dataset, in_field=True)
             pDatas.append(
-                SprayData.from_binned_file(
-                    dfiles, dataset, adcp_on=False, in_field=True)
             )
     elif dataset == 'Calypso2019':
         dfile = os.path.join(
@@ -66,7 +66,7 @@ class SprayData(profilerdata.ADCPData):
     scalar_keys:list = []
 
     def __init__(self, datafile:str, dataset:str,
-                    adcp_on:bool=True, in_field:bool=False):
+                    in_field:bool=False):
 
         # Init
         self.profile_arrays = ['lat', 'lon', 'time']
@@ -74,12 +74,12 @@ class SprayData(profilerdata.ADCPData):
         self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
 
         self.in_field = in_field
-
+        if not self.in_field:
+            adcp_on:bool=True
         self.profile_depth_arrays += ['theta']
 
         # Init
-        profilerdata.ADCPData.__init__(self, datafile, dataset,
-                                        adcp_on=adcp_on)
+        profilerdata.ADCPData.__init__(self, datafile, dataset)
 
 
     def rstr_settings(self):

@@ -5,7 +5,7 @@ import glob
 import numpy as np
 
 from profiler import profilerdata
-from profiler.loading import idg 
+from profiler.specific import idg
 
 from IPython import embed
 

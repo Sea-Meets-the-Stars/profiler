@@ -64,13 +64,18 @@ class ProfilerData:
 
     @classmethod
     def from_binned_file(cls, datafile:str, bin_style:str,
-                  dataset:str, in_field:bool=False, missid:int=None):
+                  dataset:str, in_field:bool=False, 
+                  missid:int=None, extra_dict:dict=None):
 
         # Init
-        pData = cls(datafile, dataset, in_field=in_field)
+        pData = cls(datafile, dataset)
         pData.datafile = datafile
         pData.dataset = dataset
         pData.in_field = in_field
+
+        if extra_dict is not None:
+            for key in extra_dict:
+                setattr(pData, key, extra_dict[key])
 
         # Load
         #embed(header='76 of profiler')
@@ -88,6 +93,10 @@ class ProfilerData:
 
         Args:
             d (dict): A dictionary of data.
+                Required fields:
+                    time (np.ndarray): An array of times.
+                    lat (np.ndarray): An array of latitudes.
+                    lon (np.ndarray): An array of longitudes.
             dataset (str): The name of the dataset.
             darrrays (dict): A dictionary of data arrays.
                 Required keys are:
@@ -140,6 +149,22 @@ class ProfilerData:
     @property
     def Nprof(self):
         return len(self.time)
+
+    @property
+    def darrays(self):
+        darrays = {}
+        for key in ['profile_arrays', 'depth_arrays', 
+                    'profile_depth_arrays', 'scalar_keys']:
+            darrays[key] = getattr(self, key)
+        return darrays
+
+    @property
+    def meta_dict(self):
+        mdict = {}
+        for attr in ['missid', 'platform', 'pi', 'pdict', 'dataset', 'datafile']:
+            if hasattr(self, attr):
+                mdict[attr] = getattr(self, attr)
+        return mdict
 
     def cut_on_reltime(self, timecut:tuple):
         """

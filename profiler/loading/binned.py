@@ -3,15 +3,27 @@ import numpy as np
 
 import pymatreader
 import xarray
+import pandas
 
-from profiler.utils import offsets 
+from profiler.utils import offsets
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from profiler.profilerdata import ProfilerData
 
 from IPython import embed
 
-def set_profiler(profiler, key, data, gdi:np.ndarray=None):
+def set_profiler(profiler:"ProfilerData", 
+                 key:str, data, bin_style:str, gdi:np.ndarray=None):
 
     if isinstance(data[key], xarray.core.dataarray.DataArray):
         idata = data[key].values
+    elif isinstance(data[key], np.ndarray):
+        if bin_style == 'idg':
+            idata = data[key].T
+        else:
+            idata = data[key]
     else:
         embed(header='16 of binned')
         raise IOError("update!!")
@@ -31,13 +43,16 @@ def load(profiler, bin_style:str, in_missid:int=None):
             base_key = 'bindata'
         else:
             base_key = 'ctd'
-        embed(header='NEED TO TRANSPOSE!!')
         d_bin = pymatreader.read_mat(profiler.datafile)[base_key]
     elif bin_style == 'cusack': # OSU Jesse Cusack (VMP)
         d_bin = xarray.load_dataset(profiler.datafile)
         d_bin['depth'] = d_bin.bin.values
         # Rename a few (maybe move this to a dict)
         d_bin['depth'] = d_bin.bin.values
+        # Time
+        ptimes = [pandas.Series(item).mean().timestamp() for item in pandas.to_datetime(d_bin.time.values)]
+        d_bin = d_bin.drop_vars('time')
+        d_bin['time'] = (['profile'], ptimes)
         d_bin['t'] = d_bin['temp']
         d_bin['s'] = d_bin['SP']
         d_bin['SA'] = d_bin['SA']
@@ -51,28 +66,29 @@ def load(profiler, bin_style:str, in_missid:int=None):
     if not profiler.in_field:
         profiler.scalar_keys += ['x0', 'x1', 'y0', 'y1']
     for key in profiler.scalar_keys:
-        set_profiler(profiler, key, d_bin)
+        set_profiler(profiler, key, d_bin, bin_style)
 
     # Depth arrays
     for key in profiler.depth_arrays:
-        set_profiler(profiler, key, d_bin)
+        set_profiler(profiler, key, d_bin, bin_style)
 
     # Profile arrays
-    #embed(header='30 of idg_utis')
     if not profiler.in_field:
-        profiler.profile_arrays += ['dist', 'offset', 'missid']
+        profiler.profile_arrays += ['dist', 'offset']
     for ss, key in enumerate(profiler.profile_arrays):
         # Set the mask from the first one
         if ss == 0:
             gdi = np.isfinite(d_bin[key])
-        set_profiler(profiler, key, d_bin, gdi=gdi)#[key][gdi])
+        set_profiler(profiler, key, d_bin, bin_style, gdi=gdi)#[key][gdi])
+
+    #embed(header='84 of binned')
 
     # Profile + depth
-    if profiler.has_adcp and profiler.adcp_on: 
+    if profiler.has_adcp and profiler.adcp_on:
         profiler.profile_depth_arrays += ['udop', 'vdop', 
                                     'udopacross', 'udopalong']
     for key in profiler.profile_depth_arrays:
-        set_profiler(profiler, key, d_bin, gdi=gdi)
+        set_profiler(profiler, key, d_bin, bin_style, gdi=gdi)
 
     if profiler.in_field:
         # Mission ID
@@ -86,7 +102,7 @@ def load(profiler, bin_style:str, in_missid:int=None):
             missid = in_missid
         else:
             missid = int(os.path.basename(profiler.datafile).split('.')[0])
-        setattr(profiler, key, missid*np.ones_like(profiler.lat, dtype=int))
+        setattr(profiler, key, missid)
 
         # Generate dist and offset
         #  dist is distance to the North from the median lon (km)

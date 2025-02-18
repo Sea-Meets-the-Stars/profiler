@@ -150,6 +150,11 @@ class ProfilerPairs:
 
         # Concatenate the various profilers
 
+        # Generate missid arrays
+        for pdata in self.pdata:
+            setattr(pdata, 'missida', 
+                    np.array([str(pdata.missid)]*pdata.time.size))
+
         # Time
         if max_time is not None:
             # Times
@@ -176,7 +181,7 @@ class ProfilerPairs:
 
         # Avoid using the same glider for any pairs
         if avoid_same_glider:
-            keep = self.data('missid', 0) != self.data('missid', 1)
+            keep = self.data('missida', 0) != self.data('missida', 1)
             # Parse
             self.idx0 = self.idx0[keep]
             self.idx1 = self.idx1[keep]
@@ -186,7 +191,7 @@ class ProfilerPairs:
 
         # Checks
         if avoid_same_glider:
-            assert not np.any(self.data('missid', 0) == self.data('missid', 1))
+            assert not np.any(self.data('missida', 0) == self.data('missida', 1))
 
     def data(self, key:str, ipair:int, iz:int=None):
         """
@@ -214,7 +219,10 @@ class ProfilerPairs:
                 # Concatenate
                 data = np.concatenate([getattr(item, key)[:minl,...] for item in self.pdata], axis=1)
             else:
-                data = np.concatenate([getattr(item, key) for item in self.pdata])
+                try:
+                    data = np.concatenate([getattr(item, key) for item in self.pdata])
+                except:
+                    embed(header='220 of profilepairs')
 
 
         if ipair == 2:

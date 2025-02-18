@@ -40,6 +40,9 @@ def load_emapex_infield(datafile:str, dataset:str, debug:bool=False):
         # Object me
         emApex = EMApexData.from_dict(float_dict, darrays, mdict,
                                       dataset, in_field=True)
+        # Add qual
+        emApex.qual = float_dict['qual']
+        #
         pDatas.append(emApex)
         if debug:
             break

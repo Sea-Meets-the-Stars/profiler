@@ -1,14 +1,17 @@
 import numpy as np
 import time
 
-from profiler import profiledata
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from profiler.profilerdata import ProfilerData
 
 from IPython import embed
 
-def bin_profilerdata(pdata, pmin:float=10, pstep:float=10, 
-            pmax:float=200., pd:str='d', 
-            exclude='bad', 
-            add_vel:bool=True):
+def bin_profilerdata(pdata:"ProfilerData", 
+                     pmin:float=10, pstep:float=10, 
+                     pmax:float=200., pd:str='d', 
+                     exclude='bad', add_vel:bool=True):
     """
     Bins oceanographic data in pressure or depth on the grid [pmin:pstep:pmax].
     
@@ -41,11 +44,12 @@ def bin_profilerdata(pdata, pmin:float=10, pstep:float=10,
     
     # Initialize bindata dictionary
     bindata = {
-        'time': data['time'][:, 1],
-        'lat': data['lat'][:, 1],
-        'lon': data['lon'][:, 1],
+        'time': pdata.time,
+        'lat': pdata.lat,
+        'lon': pdata.lon,
     }
 
+    '''
     if add_vel:
         bindata.update({
         'u': data['u'],
@@ -53,6 +57,7 @@ def bin_profilerdata(pdata, pmin:float=10, pstep:float=10,
         'tsurf': data['tsurf'],
         'usurf': data['usurf'],
         'vsurf': data['vsurf']})
+    '''
     
     # Set up pressure/depth grid
     if pd == 'p':
@@ -81,46 +86,65 @@ def bin_profilerdata(pdata, pmin:float=10, pstep:float=10,
     np_bins = len(bindata[pstr])
     nt = len(bindata['time'])
     for field in ['t', 's', 'theta', 'sigma', 'rho']:
-        bindata[field] = np.full((np_bins, nt), np.nan)
+        bindata[field] = np.full((nt, np_bins), np.nan)
     
     # Bin the data
     for n in range(nt):  # Loop on profiles
-        if data[pstrdata][n] is not None and len(data[pstrdata][n]) > 0:
-            ibin = np.round((data[pstrdata][n] - pmin) / pstep)
-            # NaNs
-            ibin[np.isnan(ibin)] = -999999
-            ibin = ibin.astype(int)
+        vals = getattr(pdata, pstrdata)[n]
+        #if vals is not None and len(vals) > 0: # THIS CHECK WAS SUPERFLOUX
+        ibin = np.round((vals - pmin) / pstep)
+        # NaNs
+        ibin[np.isnan(ibin)] = -999999
+        ibin = ibin.astype(int)
 
-            # Loop on bins
-            for m in range(np_bins):
-                try:
-                    # Temperature
-                    qual_field = 't'
-                    data_field = 't'
-                    iit = (ibin == m) & (data['qual'][qual_field][n] < maxflag)
-                    if np.any(iit):
-                        bindata['t'][m, n] = np.nanmean(
-                            data[data_field][n][iit])
-                except Exception as err:
-                    print(f"t {'bin'} index = [{m}, {n}]: {str(err)}")
+        # Loop on bins
+        for m in range(np_bins):
+            try:
+                # Temperature
+                #qual_field = 't'
+                #data_field = 't'
+                qualvals = getattr(pdata, 'qual')['t'][n]
+
+                iit = (ibin == m) & (qualvals < maxflag)
+                if np.any(iit):
+                    bindata['t'][n,m] = np.nanmean(
+                        pdata.t[n][iit])
+            except Exception as err:
+                print(f"t {'bin'} index = [{m}, {n}]: {str(err)}")
+                embed(header='111 of binning')
+            
+            try:
+                # Salinity and derived variables
+                #qual_field = 's'
+                #data_field = 's'
+                qualvals = getattr(pdata, 'qual')['s'][n]
+                iis = (ibin == m) & (qualvals < maxflag)
+                ii = iit & iis
                 
-                try:
-                    # Salinity and derived variables
-                    qual_field = 's'
-                    data_field = 's'
-                    iis = (ibin == m) & (data['qual'][qual_field][n] < maxflag)
-                    ii = iit & iis
-                    
-                    if np.any(iis):
-                        bindata['s'][m, n] = np.nanmean(data[data_field][n][iis])
-                    if np.any(ii):
-                        for field in ['theta', 'sigma', 'rho']:
-                            field_raw = field
-                            bindata[field][m, n] = np.nanmean(data[field_raw][n][ii])
-                except Exception as err:
-                    print(f"binsolo: s {'bin'} index = [{m}, {n}]: {str(err)}")
+                if np.any(iis):
+                    bindata['s'][n,m] = np.nanmean(pdata.s[n][iis])
+                if np.any(ii):
+                    for field in ['theta', 'sigma', 'rho']:
+                        vals = getattr(pdata, field)[n]
+                        bindata[field][n,m] = np.nanmean(vals[ii])
+            except Exception as err:
+                print(f"binsolo: s {'bin'} index = [{m}, {n}]: {str(err)}")
     
     # Add creation time
-    bindata['bintime'] = int(time.time())
+    #bindata['bintime'] = int(time.time())
+
+    # Create a new class for the binned data
+    #darrays = {}
+    #for key in ['profile_arrays', 'depth_arrays', 
+    #            'profile_depth_arrays', 'scalar_keys']:
+    #    darrays[key] = getattr(pdata, key)
+
+    print("FIX THIS HACK!!!!!!!!!!!!!!!!!!!!!!!!!")
+    tmp = pdata.darrays
+    tmp['profile_depth_arrays'] = ['t', 's', 'theta', 'sigma', 'rho']
+    #embed(header='137 of binning')
+    bData = pdata.__class__.from_dict(bindata, tmp,
+                                      pdata.meta_dict, pdata.dataset,
+                                      in_field=pdata.in_field)
     
-    return bindata
+    return bData

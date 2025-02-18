@@ -5,10 +5,8 @@ import numpy as np
 
 import pytest
 
-from profiler import floatdata
-from profiler.utils import apex_utils
+from profiler.specific import em_apex
 from profiler import binning
-from profiler.loading import em_apex 
 
 from IPython import embed
 
@@ -16,13 +14,14 @@ dataset = 'ARCTERX-Leg2'
 
 def test_raw_apex():
     # Apex
-    dfile = '/run/user/1000/gvfs/smb-share:server=10.43.20.20,share=cruiseshare/Data/floats/EM_Apex/EMApex_data_small_array_17-Feb-2025.mat'
+    dfile = '/home/xavier/Projects/Oceanography/data/ARCTERX/Floats/EM_Apex/EMApex_data_small_array_17-Feb-2025.mat'
     pDatas = em_apex.load_emapex_infield(dfile, dataset)
 
-# Binning
-#key = list(d.keys())[0]
-#bindata = binning.run(d[key], add_vel=False)
+#def test_bin_raw_apex():
+    # Apex
+dfile = '/home/xavier/Projects/Oceanography/data/ARCTERX/Floats/EM_Apex/EMApex_data_small_array_17-Feb-2025.mat'
+pDatas = em_apex.load_emapex_infield(dfile, dataset)
+    # Bin
+bData = binning.bin_profilerdata(pDatas[0], add_vel=False)
 
-def test_binned_apex():
-    datafile = '/home/xavier/Projects/Oceanography/data/ARCTERX/Floats/EM_Apex/EM_Apex_F10281.npz'
-    f10281 = floatdata.EMApexData(datafile, dataset, in_field=True)
+embed(header='26 of test apex')
