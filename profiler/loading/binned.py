@@ -4,12 +4,26 @@ import numpy as np
 import pymatreader
 import xarray
 
-from profiler import profilerdata
+from profiler.utils import offsets 
 
 from IPython import embed
 
+def set_profiler(profiler, key, data, gdi:np.ndarray=None):
 
-def load(profiler:profilerdata.ProfilerData, bin_style:str):
+    if isinstance(data[key], xarray.core.dataarray.DataArray):
+        idata = data[key].values
+    else:
+        embed(header='16 of binned')
+        raise IOError("update!!")
+
+    # gdi?
+    if gdi is not None:
+        idata = idata[gdi]
+
+    setattr(profiler, key, idata)
+
+
+def load(profiler, bin_style:str, in_missid:int=None):
     """ Load a binned dataset """
     
     if bin_style == 'idg':  # Scripps
@@ -17,6 +31,7 @@ def load(profiler:profilerdata.ProfilerData, bin_style:str):
             base_key = 'bindata'
         else:
             base_key = 'ctd'
+        embed(header='NEED TO TRANSPOSE!!')
         d_bin = pymatreader.read_mat(profiler.datafile)[base_key]
     elif bin_style == 'cusack': # OSU Jesse Cusack (VMP)
         d_bin = xarray.load_dataset(profiler.datafile)
@@ -26,8 +41,6 @@ def load(profiler:profilerdata.ProfilerData, bin_style:str):
         d_bin['t'] = d_bin['temp']
         d_bin['s'] = d_bin['SP']
         d_bin['SA'] = d_bin['SA']
-        #
-        profiler.Ndepth = 
     else: 
         raise IOError(f'Bad reader {profiler.reader}')
 
@@ -38,11 +51,11 @@ def load(profiler:profilerdata.ProfilerData, bin_style:str):
     if not profiler.in_field:
         profiler.scalar_keys += ['x0', 'x1', 'y0', 'y1']
     for key in profiler.scalar_keys:
-        setattr(profiler, key, d_bin[key])
+        set_profiler(profiler, key, d_bin)
 
     # Depth arrays
     for key in profiler.depth_arrays:
-        setattr(profiler, key, d_bin[key])
+        set_profiler(profiler, key, d_bin)
 
     # Profile arrays
     #embed(header='30 of idg_utis')
@@ -52,17 +65,14 @@ def load(profiler:profilerdata.ProfilerData, bin_style:str):
         # Set the mask from the first one
         if ss == 0:
             gdi = np.isfinite(d_bin[key])
-        setattr(profiler, key, d_bin[key][gdi])
+        set_profiler(profiler, key, d_bin, gdi=gdi)#[key][gdi])
 
     # Profile + depth
     if profiler.has_adcp and profiler.adcp_on: 
         profiler.profile_depth_arrays += ['udop', 'vdop', 
                                     'udopacross', 'udopalong']
     for key in profiler.profile_depth_arrays:
-        try:
-            setattr(profiler, key, d_bin[key][:,gdi])
-        except:
-            embed(header='61 of binned')
+        set_profiler(profiler, key, d_bin, gdi=gdi)
 
     if profiler.in_field:
         # Mission ID
@@ -72,6 +82,8 @@ def load(profiler:profilerdata.ProfilerData, bin_style:str):
         if profiler.__class__.__name__ == 'EMApexData':
             base = os.path.basename(profiler.datafile).split('.')[0]
             missid = int(base.split('F')[1])
+        elif profiler.__class__.__name__ == 'VMPData':
+            missid = in_missid
         else:
             missid = int(os.path.basename(profiler.datafile).split('.')[0])
         setattr(profiler, key, missid*np.ones_like(profiler.lat, dtype=int))
@@ -87,8 +99,8 @@ def load(profiler:profilerdata.ProfilerData, bin_style:str):
         # dist
         key = 'dist'
         profiler.profile_arrays += [key]
-        dist, offset = cugn_utils.calc_dist_offset('None',
-            profiler.lon, profiler.lat, endpoints=(lonendpts, latendpts))
+        dist, offset = offsets.calc_dist_offset(
+            profiler.lon, profiler.lat, (lonendpts, latendpts))
         # Fill in
         profiler.dist = dist
         key = 'offset'

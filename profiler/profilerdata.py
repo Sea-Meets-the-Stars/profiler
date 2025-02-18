@@ -64,7 +64,7 @@ class ProfilerData:
 
     @classmethod
     def from_binned_file(cls, datafile:str, bin_style:str,
-                  dataset:str, in_field:bool=False):
+                  dataset:str, in_field:bool=False, missid:int=None):
 
         # Init
         pData = cls(datafile, dataset, in_field=in_field)
@@ -76,7 +76,9 @@ class ProfilerData:
         #embed(header='76 of profiler')
         #from importlib import reload
         #reload(binned)
-        binned.load(pData, bin_style)
+        binned.load(pData, bin_style, in_missid=missid)
+
+        return pData
 
     @classmethod
     def from_dict(cls, d:dict, darrays:dict, mdict:dict,

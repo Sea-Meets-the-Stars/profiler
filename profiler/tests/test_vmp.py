@@ -11,11 +11,12 @@ from IPython import embed
 
 dataset = 'ARCTERX-Leg2'
 
-#def test_raw_solo():
+#def test_vmp():
 datafile = '/home/xavier/Projects/Oceanography/data/ARCTERX/VMP/combo.nc'
 vmp = vmpdata.VMPData.from_binned_file(datafile, 'cusack', 
-                                       dataset, in_field=True)
-embed(header='test_raw_solo 19')
+                                       dataset, in_field=True,
+                                       missid=20000)
+embed(header='test_vmp 19')
 
 #s8996 = load_idg.load_raw(datafile, dataset, in_field=True)
 
