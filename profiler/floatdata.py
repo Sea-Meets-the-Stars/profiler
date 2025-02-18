@@ -48,7 +48,10 @@ class SoloData(profilerdata.ProfilerData):
     scalar_keys:list = []
 
     def __init__(self, datafile:str, dataset:str,
-                    in_field:bool=False, binned:bool=False):
+                    in_field:bool=False):
+
+        # Init
+        profilerdata.ProfilerData.__init__(self, datafile, dataset)
 
         self.in_field = in_field
         self.base_key = 'bindata'
@@ -56,8 +59,6 @@ class SoloData(profilerdata.ProfilerData):
         self.depth_arrays = ['depth']
         self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
 
-        # Init
-        profiledata.ProfileData.__init__(self, datafile, dataset)
 
     @classmethod
     def from_rawfile(cls, datafile:str, dataset:str, 

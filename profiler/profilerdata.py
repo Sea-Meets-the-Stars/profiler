@@ -7,6 +7,8 @@ from abc import ABCMeta
 
 import pandas
 
+from profiler.loading import binned
+
 from IPython import embed
 
 class ProfilerData:
@@ -59,6 +61,22 @@ class ProfilerData:
 
     def load_data(self):
         pass
+
+    @classmethod
+    def from_binned_file(cls, datafile:str, bin_style:str,
+                  dataset:str, in_field:bool=False):
+
+        # Init
+        pData = cls(datafile, dataset, in_field=in_field)
+        pData.datafile = datafile
+        pData.dataset = dataset
+        pData.in_field = in_field
+
+        # Load
+        #embed(header='76 of profiler')
+        #from importlib import reload
+        #reload(binned)
+        binned.load(pData, bin_style)
 
     @classmethod
     def from_dict(cls, d:dict, darrays:dict, mdict:dict,

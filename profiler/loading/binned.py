@@ -1,33 +1,48 @@
-import pymatreader
-
+import os
 import numpy as np
 
-import gsw
-from gsw import conversions, density
+import pymatreader
+import xarray
+
+from profiler import profilerdata
 
 from IPython import embed
 
-def load_binned_data(profiler):
 
-    """ Load the CTD data for Arcteryx """
-    if pro_io.grab_ext(profiler.datafile) == 'mat':
-        d_bin = pymatreader.read_mat(profiler.datafile)
-    elif pro_io.grab_ext(profiler.datafile) == 'npz':
-        tmp = np.load(profiler.datafile, allow_pickle=True)
-        # Hack me
-        d_bin = dict(bindata=tmp)
+def load(profiler:profilerdata.ProfilerData, bin_style:str):
+    """ Load a binned dataset """
+    
+    if bin_style == 'idg':  # Scripps
+        if profiler.in_field:
+            base_key = 'bindata'
+        else:
+            base_key = 'ctd'
+        d_bin = pymatreader.read_mat(profiler.datafile)[base_key]
+    elif bin_style == 'cusack': # OSU Jesse Cusack (VMP)
+        d_bin = xarray.load_dataset(profiler.datafile)
+        d_bin['depth'] = d_bin.bin.values
+        # Rename a few (maybe move this to a dict)
+        d_bin['depth'] = d_bin.bin.values
+        d_bin['t'] = d_bin['temp']
+        d_bin['s'] = d_bin['SP']
+        d_bin['SA'] = d_bin['SA']
+        #
+        profiler.Ndepth = 
     else: 
         raise IOError(f'Bad reader {profiler.reader}')
+
+    if 'platform' in d_bin:
+        profiler.platform = d_bin['platform']
 
     # Scalars
     if not profiler.in_field:
         profiler.scalar_keys += ['x0', 'x1', 'y0', 'y1']
     for key in profiler.scalar_keys:
-        setattr(profiler, key, d_bin[profiler.base_key][key])
+        setattr(profiler, key, d_bin[key])
 
     # Depth arrays
     for key in profiler.depth_arrays:
-        setattr(profiler, key, d_bin[profiler.base_key][key])
+        setattr(profiler, key, d_bin[key])
 
     # Profile arrays
     #embed(header='30 of idg_utis')
@@ -36,15 +51,18 @@ def load_binned_data(profiler):
     for ss, key in enumerate(profiler.profile_arrays):
         # Set the mask from the first one
         if ss == 0:
-            gdi = np.isfinite(d_bin[profiler.base_key][key])
-        setattr(profiler, key, d_bin[profiler.base_key][key][gdi])
+            gdi = np.isfinite(d_bin[key])
+        setattr(profiler, key, d_bin[key][gdi])
 
     # Profile + depth
     if profiler.has_adcp and profiler.adcp_on: 
         profiler.profile_depth_arrays += ['udop', 'vdop', 
                                     'udopacross', 'udopalong']
     for key in profiler.profile_depth_arrays:
-        setattr(profiler, key, d_bin[profiler.base_key][key][:,gdi])
+        try:
+            setattr(profiler, key, d_bin[key][:,gdi])
+        except:
+            embed(header='61 of binned')
 
     if profiler.in_field:
         # Mission ID

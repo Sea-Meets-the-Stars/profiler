@@ -5,8 +5,8 @@ import glob
 import numpy as np
 import warnings
 
-from profiler.utils import loading
-from profiler import profiledata
+from profiler import profilerdata
+from profiler.loading import binned
 
 from IPython import embed
 
@@ -18,7 +18,7 @@ def load_dataset(dataset:str):
         dataset (str): The name of the dataset to load.
 
     Returns:
-        cData (CTDData): The loaded CTDData object.
+        list: List of profilerdata.ProfilerData objects
 
     Raises:
         ValueError: If the provided dataset is not supported.
@@ -29,7 +29,13 @@ def load_dataset(dataset:str):
     elif dataset == 'ARCTERX-Leg2':
         dfiles = glob.glob(os.path.join(
             os.getenv('OS_SPRAY'), 'ARCTERX', 'Leg2', '*.mat'))
-        return SprayData.from_list(dfiles, dataset, adcp_on=False, in_field=True)
+
+        pDatas = []
+        for dfile in dfiles:
+            pDatas.append(
+                SprayData.from_binned_file(
+                    dfiles, dataset, adcp_on=False, in_field=True)
+            )
     elif dataset == 'Calypso2019':
         dfile = os.path.join(
             os.getenv('OS_SPRAY'), 'Calypso', 'calypso2019_ctd.mat')
@@ -39,22 +45,16 @@ def load_dataset(dataset:str):
     else: 
         raise ValueError(f"Dataset {dataset} not supported")
 
-    # Load
-    cData = SprayData(dfile, dataset)
-
     # Survey specific cuts
     if dataset == 'Calypso2022':
-        warnings.warn("Trimming last 3 weeks of Calypso2022 data")
-        # Trim the last 3 weeks
-        maxt = np.max(cData.time)
-        mint = np.min(cData.time)
+        raise IOError("FIX THIS")
         goodt = cData.time < (maxt - 12*24*3600)
         goodt &= (cData.time > (mint + 3*24*3600))
         cData = cData.profile_subset(np.where(goodt)[0], init=False)
 
-    return cData
+    return pDatas
 
-class SprayData(profiledata.ADCPData):
+class SprayData(profilerdata.ADCPData):
     """
     Class to hold a full, standard Spray
     """
@@ -74,36 +74,21 @@ class SprayData(profiledata.ADCPData):
         self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
 
         self.in_field = in_field
-        if self.in_field:
-            self.base_key = 'bindata'
-        else:
-            self.base_key = 'ctd'
 
         self.profile_depth_arrays += ['theta']
 
         # Init
-        profiledata.ADCPData.__init__(self, datafile, dataset,
+        profilerdata.ADCPData.__init__(self, datafile, dataset,
                                         adcp_on=adcp_on)
 
-        # Load
-        loading.load_binned_data(self)
 
-    def __repr__(self):
+    def rstr_settings(self):
         """ Return the representation of the CTDData object """
-        rstr = f"SprayData object for {self.dataset}\n"
-        rstr += f"  Number of profiles: {len(self.time)}\n"
-        rstr += f"  Time range: {self.time.min()} to {self.time.max()}\n"
         # Settings (adcp_on, in_field)
+        r_s = super().rstr_settings()
 
-        rstr += f"  In field? {self.in_field}"
-        rstr += f"  ADCP on? {self.adcp_on}"
-        # Variables
-        rstr += "  Variables:\n"
-        for key in self.depth_arrays:
-            rstr += f"    {key}: {getattr(self, key).shape}\n"
-        for key in self.profile_arrays:
-            rstr += f"    {key}: {getattr(self, key).shape}\n"
-        for key in self.profile_depth_arrays:
-            rstr += f"    {key}: {getattr(self, key).shape}\n"
-        return rstr
-
+        # More settings
+        r_s.append(f"  In field? {self.in_field}")
+        r_s.append(f"  ADCP on? {self.adcp_on}")
+        
+        return r_s
