@@ -22,14 +22,6 @@ class ProfilerData:
     __metaclass__ = ABCMeta
 
 
-    dtype:str = None
-    """
-    The type of data
-    """
-
-    # Number of profiles
-    Nprof:int = None
-
     # Max dimension for z/p (just to keep track of the arrays)
     Ndepth:int = None
 
@@ -38,6 +30,7 @@ class ProfilerData:
     lon = None
     time = None
 
+    # glider offset
     dist = None
     offset = None
 
@@ -47,7 +40,7 @@ class ProfilerData:
     pi:str = None  # Principal Invesitgator
     pdict:dict = None # dict on the profiler
     dataset = None  # The name of the dataset
-    datafile:str = None 
+    datafile:str = None
 
     # CTD -- Nprof, Ndepth
     s = None
@@ -123,6 +116,10 @@ class ProfilerData:
     @property
     def ptime(self):  # pandas time
         return pandas.to_datetime(self.time, unit='s')
+
+    @property
+    def Nprof(self):
+        return len(self.time)
 
     def cut_on_reltime(self, timecut:tuple):
         """

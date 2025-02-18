@@ -14,11 +14,10 @@ from IPython import embed
 
 dataset = 'ARCTERX-Leg2'
 
-#def test_raw_apex():
+def test_raw_apex():
     # Apex
-dfile = '/run/user/1000/gvfs/smb-share:server=10.43.20.20,share=cruiseshare/Data/floats/EM_Apex/EMApex_data_small_array_17-Feb-2025.mat'
-pDatas = em_apex.load_emapex_infield(dfile, dataset)
-embed(header='21 of test')
+    dfile = '/run/user/1000/gvfs/smb-share:server=10.43.20.20,share=cruiseshare/Data/floats/EM_Apex/EMApex_data_small_array_17-Feb-2025.mat'
+    pDatas = em_apex.load_emapex_infield(dfile, dataset)
 
 # Binning
 #key = list(d.keys())[0]
