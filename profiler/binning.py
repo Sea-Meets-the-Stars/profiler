@@ -1,9 +1,11 @@
 import numpy as np
 import time
 
+from profiler import profiledata
+
 from IPython import embed
 
-def run(data, pmin:float=10, pstep:float=10, 
+def bin_profilerdata(pdata, pmin:float=10, pstep:float=10, 
             pmax:float=200., pd:str='d', 
             exclude='bad', 
             add_vel:bool=True):
@@ -12,9 +14,8 @@ def run(data, pmin:float=10, pstep:float=10,
     
     Parameters:
     -----------
-    data : dict
-        Dictionary containing oceanographic data with fields like time, lat, lon, etc.
-        The primary quantities are lists of np.ndarray
+    pdata : profilerdata.ProfilerData
+        Object containing oceanographic data with fields like time, lat, lon, etc.
     pmin : float
         Minimum pressure/depth value
     pstep : float
