@@ -240,19 +240,16 @@ class ProfilerPairs:
         """
         # Build up the data array from the pdata list
         if iz is None or iz >= 0:
-            try:
-                if getattr(self.pdata[0], key).ndim >= 2:
-                    # Find the minimum number of levels
-                    minl = np.min([getattr(item, key).shape[0] for item in self.pdata])
-                    # Concatenate
-                    data = np.concatenate([getattr(item, key)[:minl,...] for item in self.pdata], axis=1)
-                else:
-                    try:
-                        data = np.concatenate([getattr(item, key) for item in self.pdata])
-                    except:
-                        embed(header='220 of profilepairs')
-            except:
-                embed(header='220 of profilepairs')
+            if getattr(self.pdata[0], key).ndim >= 2:
+                # Find the minimum number of levels
+                minl = np.min([getattr(item, key).shape[0] for item in self.pdata])
+                # Concatenate
+                data = np.concatenate([getattr(item, key)[:minl,...] for item in self.pdata], axis=1)
+            else:
+                try:
+                    data = np.concatenate([getattr(item, key) for item in self.pdata])
+                except:
+                    embed(header='220 of profilepairs')
                 
 
 
