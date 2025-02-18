@@ -55,54 +55,55 @@ def load_dataset(dataset:str):
     return cData
 
 class SprayData(profiledata.ADCPData):
-        """
-        Class to hold a full, standard Spray
-        """
-        dtype = 'Spray'
+    """
+    Class to hold a full, standard Spray
+    """
+    dtype = 'Spray'
 
-        in_field:bool = None
-        base_key:str = None
+    in_field:bool = None
+    base_key:str = None
 
-        scalar_keys:list = []
+    scalar_keys:list = []
 
-        def __init__(self, datafile:str, dataset:str,
-                     adcp_on:bool=True, in_field:bool=False):
+    def __init__(self, datafile:str, dataset:str,
+                    adcp_on:bool=True, in_field:bool=False):
 
-            # Init
-            self.profile_arrays = ['lat', 'lon', 'time']
-            self.depth_arrays = ['depth']
-            self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
+        # Init
+        self.profile_arrays = ['lat', 'lon', 'time']
+        self.depth_arrays = ['depth']
+        self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
 
-            self.in_field = in_field
-            if self.in_field:
-                self.base_key = 'bindata'
-            else:
-                self.base_key = 'ctd'
+        self.in_field = in_field
+        if self.in_field:
+            self.base_key = 'bindata'
+        else:
+            self.base_key = 'ctd'
 
-            self.profile_depth_arrays += ['theta']
+        self.profile_depth_arrays += ['theta']
 
-            # Init
-            profiledata.ADCPData.__init__(self, datafile, dataset,
-                                          adcp_on=adcp_on)
+        # Init
+        profiledata.ADCPData.__init__(self, datafile, dataset,
+                                        adcp_on=adcp_on)
 
-            # Load
-            loading.load_binned_data(self)
+        # Load
+        loading.load_binned_data(self)
 
-        def __repr__(self):
-            """ Return the representation of the CTDData object """
-            rstr = f"SprayData object for {self.dataset}\n"
-            rstr += f"  Number of profiles: {len(self.time)}\n"
-            rstr += f"  Time range: {self.time.min()} to {self.time.max()}\n"
-            # Settings (adcp_on, in_field)
-            rstr += f"  In field? {self.in_field}"
-            rstr += f"  ADCP on? {self.adcp_on}"
-            # Variables
-            rstr += "  Variables:\n"
-            for key in self.depth_arrays:
-                rstr += f"    {key}: {getattr(self, key).shape}\n"
-            for key in self.profile_arrays:
-                rstr += f"    {key}: {getattr(self, key).shape}\n"
-            for key in self.profile_depth_arrays:
-                rstr += f"    {key}: {getattr(self, key).shape}\n"
-            return rstr
+    def __repr__(self):
+        """ Return the representation of the CTDData object """
+        rstr = f"SprayData object for {self.dataset}\n"
+        rstr += f"  Number of profiles: {len(self.time)}\n"
+        rstr += f"  Time range: {self.time.min()} to {self.time.max()}\n"
+        # Settings (adcp_on, in_field)
+
+        rstr += f"  In field? {self.in_field}"
+        rstr += f"  ADCP on? {self.adcp_on}"
+        # Variables
+        rstr += "  Variables:\n"
+        for key in self.depth_arrays:
+            rstr += f"    {key}: {getattr(self, key).shape}\n"
+        for key in self.profile_arrays:
+            rstr += f"    {key}: {getattr(self, key).shape}\n"
+        for key in self.profile_depth_arrays:
+            rstr += f"    {key}: {getattr(self, key).shape}\n"
+        return rstr
 

@@ -2,17 +2,17 @@ import os
 import numpy as np
 
 import pymatreader
-from cugn import utils as cugn_utils
+
+from profiler import io as pro_io
 
 from IPython import embed
-
 
 def load_binned_data(profiler):
 
     """ Load the CTD data for Arcteryx """
-    if os.path.splitext(profiler.datafile)[1][1:] == 'mat':
+    if pro_io.grab_ext(profiler.datafile) == 'mat':
         d_bin = pymatreader.read_mat(profiler.datafile)
-    elif os.path.splitext(profiler.datafile)[1][1:] == 'npz':
+    elif pro_io.grab_ext(profiler.datafile) == 'npz':
         tmp = np.load(profiler.datafile, allow_pickle=True)
         # Hack me
         d_bin = dict(bindata=tmp)

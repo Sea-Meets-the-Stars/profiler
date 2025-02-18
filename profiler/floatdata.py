@@ -3,11 +3,8 @@ import os
 import glob
 
 import numpy as np
-import warnings
 
-from profiler.utils import loading
-from profiler import profiledata
-from profiler.utils import apex_utils
+from profiler import profilerdata
 
 from IPython import embed
 
@@ -38,77 +35,41 @@ def load_dataset(dataset:str):
     else:
         raise IOError(f"Not ready for this dataset: {dataset}")
 
-class SoloData(profiledata.ProfileData):
-        """
-        Class to hold a full, standard Spray
-        """
-        dtype = 'Solo'
+class SoloData(profilerdata.ProfilerData):
+    """
+    Class to hold a full, standard Spray
+    """
+    platform = 'Solo'
 
-        in_field:bool = None
-        base_key:str = None
+    in_field:bool = None
+    base_key:str = None
 
-        scalar_keys:list = []
+    scalar_keys:list = []
 
-        def __init__(self, datafile:str, dataset:str,
-                     in_field:bool=False):
+    def __init__(self, datafile:str, dataset:str,
+                    in_field:bool=False, binned:bool=False):
 
-            self.in_field = in_field
-            self.base_key = 'bindata'
-            self.profile_arrays = ['lat', 'lon', 'time']
-            self.depth_arrays = ['depth']
-            self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
+        self.in_field = in_field
+        self.base_key = 'bindata'
+        self.profile_arrays = ['lat', 'lon', 'time']
+        self.depth_arrays = ['depth']
+        self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
 
-            # Init
-            profiledata.ProfileData.__init__(self, datafile, dataset)
+        # Init
+        profiledata.ProfileData.__init__(self, datafile, dataset)
 
+        if binned:
             loading.load_binned_data(self)
-
-        def __repr__(self):
-            """ Return the representation of the CTDData object """
-            rstr = f"SoloData object for {self.dataset}\n"
-            rstr += f"  Number of profiles: {len(self.time)}\n"
-            rstr += f"  Time range: {self.time.min()} to {self.time.max()}\n"
-            # Variables
-            rstr += "  Variables:\n"
-            for key in self.depth_arrays:
-                rstr += f"    {key}: {getattr(self, key).shape}\n"
-            for key in self.profile_arrays:
-                rstr += f"    {key}: {getattr(self, key).shape}\n"
-            for key in self.profile_depth_arrays:
-                rstr += f"    {key}: {getattr(self, key).shape}\n"
-            return rstr
-
-
+        else:
+            loading.load_raw_data(self)
 
 class EMApexData(SoloData):
-        """
-        Class to hold a full, standard EM Apex
-        """
-        dtype = 'EMApex'
+    """
+    Class to hold a full, standard EM Apex
+    """
+    platform = 'EMApex'
 
-        in_field:bool = None
-        base_key:str = None
+    in_field:bool = None
+    base_key:str = None
 
-        scalar_keys:list = []
-
-        def __init__(self, datafile:str, dataset:str,
-                     in_field:bool=False):
-
-            self.in_field = in_field
-            self.base_key = 'bindata'
-            self.profile_arrays = ['lat', 'lon', 'time']
-            self.depth_arrays = ['depth']
-            self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
-
-            # Init
-            profiledata.ProfileData.__init__(self, datafile, dataset)
-
-            loading.load_binned_data(self)
-
-        def __repr__(self):
-            """ Return the representation of the EMApex object """
-            # Call the super
-            rstr = super().__repr__()
-            rstr.replace('Solo', 'EMApex')
-            #
-            return rstr
+    scalar_keys:list = []

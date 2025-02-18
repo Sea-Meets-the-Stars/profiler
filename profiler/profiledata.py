@@ -1,3 +1,4 @@
+THIS IS DEPRECATED!!!!!!!!!!!!!!!!!!!
 """ Simple Class to hold glider data """
 import os
 import glob
