@@ -30,6 +30,11 @@ def load_emapex_infield(datafile:str, dataset:str, debug:bool=False):
     floats = list(d['E'].keys())
     floats.sort()
     for ifloat in floats:
+        # Skip one bad one 
+        if ifloat == 'F9462':
+            print("Skipping F9462")
+            print("REMOVE THIS SOMEDAY!!!")
+            continue
         # Meta dict
         mdict = {}
         mdict['datafile'] = datafile
