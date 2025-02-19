@@ -9,10 +9,15 @@ import gsw
 from gsw import conversions, density
 
 from profiler.floatdata import EMApexData
+from profiler import binning
 
 from IPython import embed
 
-def load_emapex_infield(datafile:str, dataset:str, debug:bool=False):
+def load_emapex_infield(datafile:str, dataset:str, 
+                        binme:bool=True,
+                        debug:bool=False,
+                        skip_floats:list=None,
+                        add_vel:bool=True):
     """
     Load the EMApex data for infield processing
 
@@ -35,6 +40,9 @@ def load_emapex_infield(datafile:str, dataset:str, debug:bool=False):
             print("Skipping F9462")
             print("REMOVE THIS SOMEDAY!!!")
             continue
+        if skip_floats is not None and ifloat in skip_floats:
+            print(f"Skipping {ifloat}")
+            continue
         # Meta dict
         mdict = {}
         mdict['datafile'] = datafile
@@ -45,9 +53,15 @@ def load_emapex_infield(datafile:str, dataset:str, debug:bool=False):
         # Object me
         emApex = EMApexData.from_dict(float_dict, darrays, mdict,
                                       dataset, in_field=True)
+
         # Add qual
         emApex.qual = float_dict['qual']
-        #
+
+        # Bin?
+        if binme:
+            emApex = binning.bin_profilerdata(
+                emApex, add_vel=add_vel)
+        # Finish
         pDatas.append(emApex)
         if debug:
             break

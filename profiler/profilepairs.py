@@ -63,6 +63,7 @@ class ProfilerPairs:
     def __init__(self, pdata:list, 
                  max_dist:float=None, max_time:float=None,
                  from_scratch:bool=True, avoid_same_glider:bool=True,
+                 randomize:bool=True,
                  debug:bool=False):
         """ Object to generate and hold pairs of 
         measurements from profilers
@@ -78,6 +79,8 @@ class ProfilerPairs:
         self.max_time = max_time
         self.avoid_same_glider = avoid_same_glider
         self.debug = debug
+
+        self.randomize = randomize
 
         # Separations
         self.r = None
@@ -155,7 +158,7 @@ class ProfilerPairs:
             profiler.dist = dist
             profiler.offset = offset
 
-    def generate_pairs(self, max_dist:float=None, max_time:float=None,
+    def generate_pairs(self, max_dist:float=None, max_time:float=None, 
                        from_scratch:bool=True, avoid_same_glider:bool=True):
         """
         Generate pairs of gliders that are within max_dist and max_time.
@@ -203,13 +206,46 @@ class ProfilerPairs:
 
             # Restrcit to the positive values to avoid double counting
             pos = dt > 0.
-            tcut = dt < max_time
+            neg = dt < 0.
 
-            cut = tcut & pos
-            idx = np.where(tcut & pos)
+            assert np.sum(neg) + np.sum(pos) == (dt.size - t.size)
+
+            tcut_high = dt < max_time
+            good_pos = pos & tcut_high
+
+            # Randomize?
+            if self.randomize:
+                # Take a random draw from neg/pos
+                npos = np.sum(good_pos)
+                pidx = np.where(good_pos)
+                idx = np.random.choice(np.arange(2*npos),
+                                       size=npos,
+                                       replace=False)
+                # Flip me
+                use_pos = np.zeros(npos, dtype=bool)
+                flip = idx < npos
+                use_pos[flip] = True
+                # 
+                new_idx0, new_idx1 = [], []
+                for ii in range(npos):
+                    if use_pos[ii]:
+                        new_idx0.append(pidx[0][ii])
+                        new_idx1.append(pidx[1][ii])
+                    else: # flip
+                        new_idx0.append(pidx[1][ii])
+                        new_idx1.append(pidx[0][ii])
+                idx = (np.array(new_idx0), np.array(new_idx1))
+            else:
+                idx = np.where(good_pos)
+
             # Parse
             self.idx0 = idx[0]
             self.idx1 = idx[1]
+
+        # debug
+        if self.debug:
+            print("Debugging!!!!!")
+            embed(header='214 of profilepairs')
 
         # Avoid using the same glider for any pairs
         if self.debug:
@@ -249,9 +285,10 @@ class ProfilerPairs:
         if iz is None or iz >= 0:
             if getattr(self.pdata[0], key).ndim >= 2:
                 # Find the minimum number of levels
-                minl = np.min([getattr(item, key).shape[0] for item in self.pdata])
+                minl = np.min([getattr(item, key).shape[1] for item in self.pdata])
                 # Concatenate
-                data = np.concatenate([getattr(item, key)[:minl,...] for item in self.pdata], axis=1)
+                data = np.concatenate([getattr(item, key)[...,:minl]
+                                       for item in self.pdata], axis=0)
             else:
                 try:
                     data = np.concatenate([getattr(item, key) for item in self.pdata])
@@ -271,7 +308,10 @@ class ProfilerPairs:
             return data[idx]
         else:
             if iz >=0 :
-                return data[iz][idx]
+                try:
+                    return data[:,iz][idx]
+                except:
+                    embed(header='282 of profilepairs')
             else: # isopycnals
                 vals = []
                 for interpolator in self.interpolators:

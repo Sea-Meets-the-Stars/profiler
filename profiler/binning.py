@@ -143,8 +143,15 @@ def bin_profilerdata(pdata:"ProfilerData",
     tmp = pdata.darrays
     tmp['profile_depth_arrays'] = ['t', 's', 'theta', 'sigma', 'rho']
     #embed(header='137 of binning')
+    #print(f'Depths: {bindata["depth"]}')
     bData = pdata.__class__.from_dict(bindata, tmp,
                                       pdata.meta_dict, pdata.dataset,
                                       in_field=pdata.in_field)
+
+    # Add depths
+    if pd == 'p':
+        bData.p = bindata['p']
+    else:
+        bData.depth = bindata['depth']
     
     return bData
