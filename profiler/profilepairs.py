@@ -62,7 +62,8 @@ class ProfilerPairs:
 
     def __init__(self, pdata:list, 
                  max_dist:float=None, max_time:float=None,
-                 from_scratch:bool=True, avoid_same_glider:bool=True):
+                 from_scratch:bool=True, avoid_same_glider:bool=True,
+                 debug:bool=False):
         """ Object to generate and hold pairs of 
         measurements from profilers
 
@@ -76,6 +77,7 @@ class ProfilerPairs:
         self.max_dist = max_dist
         self.max_time = max_time
         self.avoid_same_glider = avoid_same_glider
+        self.debug = debug
 
         # Separations
         self.r = None
@@ -142,6 +144,9 @@ class ProfilerPairs:
         lonendpts = (self.min_lon, self.max_lon)
         latendpts = (self.min_lat, self.max_lat)
 
+        print(f"Using lonendpts: {lonendpts}")
+        print(f"Using latendpts: {latendpts}")
+
         # Calculate the distance from the line connecting those
         for profiler in self.pdata:
             dist, offset = offsets.calc_dist_offset(
@@ -207,6 +212,8 @@ class ProfilerPairs:
             self.idx1 = idx[1]
 
         # Avoid using the same glider for any pairs
+        if self.debug:
+            embed(header='214 of profilepairs')
         if avoid_same_glider:
             keep = self.data('missida', 0) != self.data('missida', 1)
             # Parse
