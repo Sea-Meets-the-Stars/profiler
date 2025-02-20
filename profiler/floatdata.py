@@ -74,3 +74,14 @@ class EMApexData(SoloData):
     base_key:str = None
 
     scalar_keys:list = []
+
+class EMApexData(SoloData):
+    """
+    Class to hold a full, standard EM Apex
+    """
+    platform = 'Alto'
+
+    in_field:bool = None
+    base_key:str = None
+
+    scalar_keys:list = []

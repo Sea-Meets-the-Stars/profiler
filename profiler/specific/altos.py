@@ -5,6 +5,8 @@ import pymatreader
 
 import numpy as np
 
+import gsw
+from gsw import conversions, density
 
 from profiler.floatdata import EMApexData
 from profiler import binning
@@ -12,7 +14,7 @@ from profiler.processing import gsw as profiler_gsw
 
 from IPython import embed
 
-def load_emapex_infield(datafile:str, dataset:str, 
+def load_infield(datafile:str, dataset:str, 
                         binme:bool=True,
                         debug:bool=False,
                         skip_floats:list=None,
@@ -31,24 +33,17 @@ def load_emapex_infield(datafile:str, dataset:str,
     pDatas = []
 
     # Loop on floats
-    floats = list(d['E'].keys())
-    floats.sort()
-    for ifloat in floats:
-        # Skip one bad one 
-        if ifloat == 'F9462':
-            print("Skipping F9462")
-            print("REMOVE THIS SOMEDAY!!!")
-            continue
-        if skip_floats is not None and ifloat in skip_floats:
-            print(f"Skipping {ifloat}")
+    for ss, flnum in enumerate(d['A']['flnum']):
+        if skip_floats is not None and flnum in skip_floats:
+            print(f"Skipping {flnum}")
             continue
         # Meta dict
         mdict = {}
         mdict['datafile'] = datafile
-        mdict['missid'] = int(ifloat[1:])
+        mdict['missid'] = flnum
         #
-        print(f"Working on float {ifloat}")
-        float_dict, darrays = process_em_apex_float(d['E'][ifloat])
+        print(f"Working on float {flnum}")
+        float_dict, darrays = process_alto_float(d['A'], ss)
         # Object me
         emApex = EMApexData.from_dict(float_dict, darrays, mdict,
                                       dataset, in_field=True)
@@ -68,20 +63,26 @@ def load_emapex_infield(datafile:str, dataset:str,
     # Return
     return pDatas
 
-def process_em_apex_float(ifloat:dict):
+def process_alto_float(d:dict, ss:int):
 
-    #
+    nprof = len(d['profnum'][ss])
+    
+    ifloat = {}
     darrays = {}
     # Rename
     darrays['profile_depth_arrays'] = ['t', 's', 'p']
-    ifloat['t'] =  ifloat.pop('te').T
-    ifloat['s'] =  ifloat.pop('sa').T
-    ifloat['p'] =  ifloat.pop('pr').T
+    ifloat['t'] = d['temp'][ss].T
+    ifloat['s'] = d['sal'][ss].T
+    ifloat['p'] =  np.outer(np.ones(nprof), d['pgrid'][0])
 
     # Replace time with time_prof!
     #   And convert to Unix time
-    ifloat['time'] =  (ifloat.pop('time_prof') - 719529) * 86400
     darrays['profile_arrays'] = ['time', 'lat', 'lon']
+
+    # Prep time, lat, lon
+    ifloat['time'] = ((d['dn_beg'][ss]+d['dn_end'][ss])/2. - 719529) * 86400
+    ifloat['lat'] = (d['lat_beg'][ss]+d['lat_end'][ss])/2.
+    ifloat['lon'] = (d['lon_beg'][ss]+d['lon_end'][ss])/2.
 
     # Depth arrays
     darrays['depth_arrays'] = []
@@ -93,7 +94,6 @@ def process_em_apex_float(ifloat:dict):
 
     # GSW me
     profiler_gsw.process_dict(ifloat)
-
 
     # Return
     return ifloat, darrays
