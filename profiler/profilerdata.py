@@ -3,7 +3,7 @@
 import numpy as np
 import warnings
 
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 
 import pandas
 
@@ -42,6 +42,8 @@ class ProfilerData:
     pi:str = None  # Principal Invesitgator
     pdict:dict = None # dict on the profiler
     dataset = None  # The name of the dataset
+
+    # I/O
     datafile:str = None
 
     # CTD -- Nprof, Ndepth
@@ -58,9 +60,6 @@ class ProfilerData:
     def __init__(self, datafile:str, dataset:str):
         self.datafile = datafile
         self.dataset = dataset
-
-    def load_data(self):
-        pass
 
     @classmethod
     def from_binned_file(cls, datafile:str, bin_style:str,
@@ -82,6 +81,40 @@ class ProfilerData:
         #from importlib import reload
         #reload(binned)
         binned.load(pData, bin_style, in_missid=missid)
+
+        return pData
+
+    @abstractmethod
+    def raw_loader(self, datafile:str):
+        pass
+
+    @classmethod
+    def from_rawfile(cls, datafile:str, dataset:str, 
+                     in_field:bool=False, mdict:dict=None,
+                     **kwargs):
+        """
+        Load a raw IDG file.
+
+        Parameters:
+            datafile (str): The path to the data file.
+            dataset (str): The name of the dataset.
+            in_field (bool): Whether the data is in-field or not.
+
+        Returns:
+            cData (CTDData): The loaded CTDData object.
+        """
+        # meta dict
+        if mdict is None:
+            mdict = {}
+        mdict['datafile'] = datafile
+        mdict['dataset'] = dataset
+
+        # Generate dict
+        d, darrays = cls.raw_loader(datafile)
+
+        # Init
+        pData = cls.from_dict(d, darrays, mdict, dataset, 
+                              in_field=in_field)
 
         return pData
 
@@ -141,6 +174,10 @@ class ProfilerData:
 
         # Return
         return pData
+    
+    @property
+    def raw_loader(self):
+        pass
 
     @property
     def ptime(self):  # pandas time

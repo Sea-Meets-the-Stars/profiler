@@ -47,15 +47,12 @@ def load(profiler, bin_style:str, in_missid:int=None):
     elif bin_style == 'cusack': # OSU Jesse Cusack (VMP)
         d_bin = xarray.load_dataset(profiler.datafile)
         d_bin['depth'] = d_bin.bin.values
-        # Rename a few (maybe move this to a dict)
-        d_bin['depth'] = d_bin.bin.values
         # Time
         ptimes = [pandas.Series(item).mean().timestamp() for item in pandas.to_datetime(d_bin.time.values)]
         d_bin = d_bin.drop_vars('time')
         d_bin['time'] = (['profile'], ptimes)
         d_bin['t'] = d_bin['temp']
         d_bin['s'] = d_bin['SP']
-        d_bin['SA'] = d_bin['SA']
     elif bin_style == 'triaxus': # Triaxus
         d = pymatreader.read_mat(profiler.datafile, 
                                  verify_compressed_data_integrity=True)  # FAILED
@@ -67,6 +64,19 @@ def load(profiler, bin_style:str, in_missid:int=None):
         d_bin['t'] = d_bin['T']
         d_bin['s'] = d_bin['S']
         d_bin['sigma'] = d_bin['sigma_t']
+    elif bin_style == 'slocumb': # OSU Jesse Cusack (VMP)
+        d_bin = xarray.load_dataset(profiler.datafile)
+        d_bin['depth'] = d_bin.depth.values
+        # Time
+        ptimes = [pandas.Series(item).mean().timestamp() for item in pandas.to_datetime(d_bin.profile_time.values)]
+        d_bin['time'] = (['profile_id'], ptimes)
+        #embed(header='72 of binned')
+        d_bin['t'] = (['profile_id','z'], d_bin['temperature'].values.T)
+        d_bin['s'] = (['profile_id','z'], d_bin['salinity'].values.T)
+        d_bin['SA'] = (['profile_id','z'], d_bin['SA'].values.T)
+        # Average lat, lon to get a single value
+        d_bin['lat'] = d_bin['lat'].mean(dim='z')
+        d_bin['lon'] = d_bin['lon'].mean(dim='z')
     else: 
         raise IOError(f'Bad reader {profiler.reader}')
 
@@ -89,8 +99,14 @@ def load(profiler, bin_style:str, in_missid:int=None):
     for ss, key in enumerate(profiler.profile_arrays):
         # Set the mask from the first one
         if ss == 0:
+            #if isinstance(d_bin[key], xarray.core.dataarray.DataArray):
+            #    gdi = np.isfinite(d_bin[key].values)
+            #else:
             gdi = np.isfinite(d_bin[key])
-        set_profiler(profiler, key, d_bin, bin_style, gdi=gdi)#[key][gdi])
+        try:
+            set_profiler(profiler, key, d_bin, bin_style, gdi=gdi)#[key][gdi])
+        except:
+            embed(header='100 of binned')
 
     #embed(header='84 of binned')
 
@@ -99,18 +115,23 @@ def load(profiler, bin_style:str, in_missid:int=None):
         profiler.profile_depth_arrays += ['udop', 'vdop', 
                                     'udopacross', 'udopalong']
     for key in profiler.profile_depth_arrays:
-        set_profiler(profiler, key, d_bin, bin_style, gdi=gdi)
+        try:
+            set_profiler(profiler, key, d_bin, bin_style, gdi=gdi)
+        except:
+            embed(header='112 of binned')
 
     if profiler.in_field:
         # Mission ID
         key = 'missid'
         #profiler.profile_arrays += [key]
         #embed(header='53 of loading')
-        if profiler.__class__.__name__ == 'EMApexData':
+        if in_missid is not None:
+            missid = in_missid
+        elif profiler.__class__.__name__ == 'EMApexData':
             base = os.path.basename(profiler.datafile).split('.')[0]
             missid = int(base.split('F')[1])
-        elif profiler.__class__.__name__ in ['VMPData', 'TriaxusData']:
-            missid = in_missid
+        #elif profiler.__class__.__name__ in ['VMPData', 'TriaxusData']:
+        #    missid = in_missid
         else:
             missid = int(os.path.basename(profiler.datafile).split('.')[0])
         setattr(profiler, key, missid)

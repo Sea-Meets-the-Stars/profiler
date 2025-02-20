@@ -4,9 +4,11 @@ import glob
 
 import numpy as np
 import warnings
+import xarray
 
 from profiler import profilerdata
 from profiler.loading import binned
+from profiler.loading import load_raw
 
 from IPython import embed
 
@@ -69,7 +71,7 @@ class SprayData(profilerdata.ADCPData):
                     in_field:bool=False):
 
         # Init
-        self.profile_arrays = ['lat', 'lon', 'time']
+        self.profile_arrays = ['time', 'lat', 'lon', 'time']
         self.depth_arrays = ['depth']
         self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
 
@@ -103,9 +105,12 @@ class SlocumbData(profilerdata.ProfilerData):
     in_field:bool = None
 
     scalar_keys:list = []
+    
+    # Loader
+    loader_dict = dict(t='temperature', s='salinity')
 
     def __init__(self, datafile:str, dataset:str,
-                    in_field:bool=False):
+                    in_field:bool=False, binned:bool=False):
 
         # Init
         profilerdata.ProfilerData.__init__(self, datafile, dataset)
@@ -113,5 +118,4 @@ class SlocumbData(profilerdata.ProfilerData):
         self.in_field = in_field
         self.profile_arrays = ['lat', 'lon', 'time']
         self.depth_arrays = ['depth']
-        self.profile_depth_arrays = ['s', 't', 'theta', 'sigma', 'SA']
-
+        self.profile_depth_arrays = ['s', 't', 'SA']

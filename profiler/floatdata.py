@@ -20,6 +20,9 @@ class SoloData(profilerdata.ProfilerData):
 
     scalar_keys:list = []
 
+    # Loader
+    raw_loader = idg.load_raw
+
     def __init__(self, datafile:str, dataset:str,
                     in_field:bool=False):
 
@@ -33,34 +36,6 @@ class SoloData(profilerdata.ProfilerData):
         self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
 
 
-    @classmethod
-    def from_rawfile(cls, datafile:str, dataset:str, 
-                     in_field:bool=False, mdict:dict=None):
-        """
-        Load a raw IDG file.
-
-        Parameters:
-            datafile (str): The path to the data file.
-            dataset (str): The name of the dataset.
-            in_field (bool): Whether the data is in-field or not.
-
-        Returns:
-            cData (CTDData): The loaded CTDData object.
-        """
-        # meta dict
-        if mdict is None:
-            mdict = {}
-        mdict['datafile'] = datafile
-        mdict['dataset'] = dataset
-
-        # Generate dict
-        d, darrays = idg.load_raw(datafile)
-
-        # Init
-        pData = cls.from_dict(d, darrays, mdict, dataset, 
-                              in_field=in_field)
-
-        return pData
 
 
 class EMApexData(SoloData):

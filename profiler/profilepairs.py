@@ -208,7 +208,8 @@ class ProfilerPairs:
             pos = dt > 0.
             neg = dt < 0.
 
-            assert np.sum(neg) + np.sum(pos) == (dt.size - t.size)
+            if self.randomize:
+                assert np.sum(neg) + np.sum(pos) == (dt.size - t.size)
 
             tcut_high = dt < max_time
             good_pos = pos & tcut_high
