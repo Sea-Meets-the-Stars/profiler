@@ -36,6 +36,32 @@ class SoloData(profilerdata.ProfilerData):
         self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
 
 
+class FlipData(profilerdata.ProfilerData):
+    """
+    Class to hold a full, standard Spray
+    """
+    platform = 'Flip'
+
+    in_field:bool = None
+    base_key:str = None
+
+    scalar_keys:list = []
+
+    # Loader
+    raw_loader = idg.load_raw
+
+    def __init__(self, datafile:str, dataset:str,
+                    in_field:bool=False):
+
+        # Init from the parent
+        profilerdata.ProfilerData.__init__(self, datafile, dataset)
+        self.in_field = in_field
+        self.base_key = 'bindata'
+        self.profile_arrays = ['lat', 'lon', 'time']
+        self.depth_arrays = ['depth']
+        self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
+
+
 
 
 class EMApexData(SoloData):
