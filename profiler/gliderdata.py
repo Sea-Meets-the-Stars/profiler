@@ -92,3 +92,26 @@ class SprayData(profilerdata.ADCPData):
         r_s.append(f"  ADCP on? {self.adcp_on}")
         
         return r_s
+
+
+class SlocumbData(profilerdata.ProfilerData):
+    """
+    Class to hold a full, standard Spray
+    """
+    platform = 'Slocumb'
+
+    in_field:bool = None
+
+    scalar_keys:list = []
+
+    def __init__(self, datafile:str, dataset:str,
+                    in_field:bool=False):
+
+        # Init
+        profilerdata.ProfilerData.__init__(self, datafile, dataset)
+
+        self.in_field = in_field
+        self.profile_arrays = ['lat', 'lon', 'time']
+        self.depth_arrays = ['depth']
+        self.profile_depth_arrays = ['s', 't', 'theta', 'sigma', 'SA']
+

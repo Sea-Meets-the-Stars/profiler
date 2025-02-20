@@ -9,33 +9,6 @@ from profiler.specific import idg
 
 from IPython import embed
 
-def load_dataset(dataset:str):
-    """
-    Load a dataset based on the provided dataset name.
-
-    Parameters:
-        dataset (str): The name of the dataset to load.
-
-    Returns:
-        cData (CTDData): The loaded CTDData object.
-
-    Raises:
-        ValueError: If the provided dataset is not supported.
-    """
-    if dataset == 'ARCTERX-Leg2':
-        # Solo
-        dfiles = glob.glob(
-            '/home/xavier/Projects/Oceanography/data/ARCTERX/Floats/Solo/*.mat')
-        solo = SoloData.from_list(dfiles, dataset, in_field=True)
-        # EM Apex
-        dfiles = glob.glob(
-            '/home/xavier/Projects/Oceanography/data/ARCTERX/Floats/EM_Apex/*.npz')
-        em_apex = EMApexData.from_list(dfiles, dataset, in_field=True)
-        #
-        return [solo, em_apex]
-    else:
-        raise IOError(f"Not ready for this dataset: {dataset}")
-
 class SoloData(profilerdata.ProfilerData):
     """
     Class to hold a full, standard Spray
