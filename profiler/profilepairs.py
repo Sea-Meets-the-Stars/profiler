@@ -140,10 +140,10 @@ class ProfilerPairs:
         # Find max,min lat lon in the profilers
         lat = np.concatenate([item.lat for item in self.pdata])
         lon = np.concatenate([item.lon for item in self.pdata])
-        self.max_lat = np.max(lat)
-        self.min_lat = np.min(lat)
-        self.max_lon = np.max(lon)
-        self.min_lon = np.min(lon)
+        self.max_lat = np.nanmax(lat)
+        self.min_lat = np.nanmin(lat)
+        self.max_lon = np.nanmax(lon)
+        self.min_lon = np.nanmin(lon)
         lonendpts = (self.min_lon, self.max_lon)
         latendpts = (self.min_lat, self.max_lat)
 
@@ -157,6 +157,9 @@ class ProfilerPairs:
             # Set
             profiler.dist = dist
             profiler.offset = offset
+
+        if self.debug:
+            embed(header='162 of pairs')
 
     def generate_pairs(self, max_dist:float=None, max_time:float=None, 
                        from_scratch:bool=True, avoid_same_glider:bool=True):
@@ -246,11 +249,8 @@ class ProfilerPairs:
         # debug
         if self.debug:
             print("Debugging!!!!!")
-            embed(header='214 of profilepairs')
+            embed(header='252 of profilepairs')
 
-        # Avoid using the same glider for any pairs
-        if self.debug:
-            embed(header='214 of profilepairs')
         if avoid_same_glider:
             keep = self.data('missida', 0) != self.data('missida', 1)
             # Parse

@@ -18,6 +18,7 @@ def load_infield(datafile:str, dataset:str,
                         binme:bool=True,
                         debug:bool=False,
                         skip_floats:list=None,
+                        missid_offset:int=0,
                         add_vel:bool=True):
     """
     Load the EMApex data for infield processing
@@ -40,7 +41,7 @@ def load_infield(datafile:str, dataset:str,
         # Meta dict
         mdict = {}
         mdict['datafile'] = datafile
-        mdict['missid'] = flnum
+        mdict['missid'] = flnum + missid_offset
         #
         print(f"Working on float {flnum}")
         float_dict, darrays = process_alto_float(d['A'], ss)
