@@ -53,18 +53,17 @@ def load_infield(datafile:str, dataset:str,
         print(f"Working on float {flnum}")
         float_dict, darrays = process_alto_float(d['A'], ss)
         # Object me
-        emApex = AltoData.from_dict(float_dict, darrays, mdict,
+        alto = AltoData.from_dict(float_dict, darrays, mdict,
                                       dataset, in_field=True)
 
         # Add qual
-        emApex.qual = float_dict['qual']
+        alto.qual = float_dict['qual']
 
         # Bin?
         if binme:
-            emApex = binning.bin_profilerdata(
-                emApex, add_vel=add_vel)
+            alto = binning.bin_profilerdata(alto)
         # Finish
-        pDatas.append(emApex)
+        pDatas.append(alto)
         if debug:
             break
 
@@ -104,7 +103,7 @@ def process_alto_float(d:dict, ss:int):
     ifloat['lon'] = (d['lon_beg'][ss]+d['lon_end'][ss])/2.
 
     # Add a random bit of time to the profile times
-    ifloat['time'] += np.random.uniform(0, 1, nprof)
+    ifloat['time'] += np.random.uniform(0, 1, size=nprof)
 
     # NaN out the bad profiles
     bad = np.zeros(nprof, dtype=bool)

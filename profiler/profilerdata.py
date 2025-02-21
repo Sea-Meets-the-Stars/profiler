@@ -77,9 +77,6 @@ class ProfilerData:
                 setattr(pData, key, extra_dict[key])
 
         # Load
-        #embed(header='76 of profiler')
-        #from importlib import reload
-        #reload(binned)
         binned.load(pData, bin_style, in_missid=missid)
 
         return pData

@@ -239,7 +239,7 @@ class ProfilerPairs:
                     bad_df = pandas.DataFrame(
                         dict(i0=tzero[0][bad], 
                              i1=tzero[1][bad]))
-                    embed(header='235 of profilepairs')
+                    embed(header='242 of profilepairs')
                 assert np.sum(neg) + np.sum(pos) == (dt.size - t.size)
 
             tcut_high = dt < max_time

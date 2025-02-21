@@ -58,8 +58,7 @@ def load_emapex_infield(datafile:str, dataset:str,
 
         # Bin?
         if binme:
-            emApex = binning.bin_profilerdata(
-                emApex, add_vel=add_vel)
+            emApex = binning.bin_profilerdata(emApex)
         # Finish
         pDatas.append(emApex)
         if debug:
