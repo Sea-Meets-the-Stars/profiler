@@ -54,6 +54,7 @@ Contents
    getting_started
    basic_usage
    data_formats
+   data_model
 
 .. toctree::
    :maxdepth: 2
@@ -63,6 +64,14 @@ Contents
    api/instruments
    api/processing
    api/analysis
+   api/data_model
+
+.. toctree::
+   :maxdepth: 2
+   :caption: File Formats
+
+   data_formats
+   file_specifications
 
 .. toctree::
    :maxdepth: 1

@@ -56,7 +56,7 @@ clean:
 	rm -rf $(LOCALFILES)
 
 apirst:
-	SPHINX_APIDOC_OPTIONS=$(SPHINXAPIOPT) $(SPHINXAPI) --separate -o ./api ../wrangler ../wrangler/tests/* ../wrangler/version.py 
+	SPHINX_APIDOC_OPTIONS=$(SPHINXAPIOPT) $(SPHINXAPI) --separate -o ./api ../profiler ../profiler/tests/* ../profiler/version.py 
 #	python ./scripts/build_imgproc_defaults.py
 
 html:
@@ -124,8 +124,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/wrangler"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/wrangler"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/profiler"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/profiler"
 	@echo "# devhelp"
 
 epub:

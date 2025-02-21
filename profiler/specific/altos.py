@@ -76,6 +76,7 @@ def process_alto_float(d:dict, ss:int):
     ifloat['s'] = d['sal'][ss].T
     ifloat['p'] =  np.outer(np.ones(nprof), d['pgrid'][0])
 
+
     # Replace time with time_prof!
     #   And convert to Unix time
     darrays['profile_arrays'] = ['time', 'lat', 'lon']
@@ -85,6 +86,9 @@ def process_alto_float(d:dict, ss:int):
     ifloat['time'] = ((d['dn_beg'][ss]+d['dn_end'][ss])/2. - 719529) * 86400
     ifloat['lat'] = (d['lat_beg'][ss]+d['lat_end'][ss])/2.
     ifloat['lon'] = (d['lon_beg'][ss]+d['lon_end'][ss])/2.
+
+    # Add a random bit of time to the profile times
+    ifloat['time'] += np.random.uniform(0, 1, nprof)
 
     # NaN out the bad profiles
     bad = np.zeros(nprof, dtype=bool)
