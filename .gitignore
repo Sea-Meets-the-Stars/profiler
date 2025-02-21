@@ -8,6 +8,7 @@ __pycache__/
 
 # docs
 docs/api/profiler.*
+sphinx_warnings.out
 
 # Distribution / packaging
 .Python
