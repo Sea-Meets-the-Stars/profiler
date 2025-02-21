@@ -55,6 +55,7 @@ Contents
    basic_usage
    data_formats
    data_model
+   arcterx_examples
 
 .. toctree::
    :maxdepth: 2
