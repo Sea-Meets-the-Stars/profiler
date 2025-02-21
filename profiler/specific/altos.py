@@ -81,6 +81,7 @@ def process_alto_float(d:dict, ss:int):
     darrays['profile_arrays'] = ['time', 'lat', 'lon']
 
     # Prep time, lat, lon
+    #  TODO -- Do this more precisely
     ifloat['time'] = ((d['dn_beg'][ss]+d['dn_end'][ss])/2. - 719529) * 86400
     ifloat['lat'] = (d['lat_beg'][ss]+d['lat_end'][ss])/2.
     ifloat['lon'] = (d['lon_beg'][ss]+d['lon_end'][ss])/2.

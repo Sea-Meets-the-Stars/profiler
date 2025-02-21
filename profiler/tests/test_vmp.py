@@ -3,6 +3,10 @@
 import glob
 import numpy as np
 
+import os
+
+apath = os.getenv('ARCTERX')
+
 import pytest
 
 from profiler import vmpdata
@@ -11,12 +15,12 @@ from IPython import embed
 
 dataset = 'ARCTERX-Leg2'
 
-#def test_vmp():
-datafile = '/home/xavier/Projects/Oceanography/data/ARCTERX/VMP/combo.nc'
-vmp = vmpdata.VMPData.from_binned_file(datafile, 'cusack', 
+def test_vmp():
+    datafile = os.path.join(apath, 'ARCTERX/VMP/combo.nc')
+    vmp = vmpdata.VMPData.from_binned_file(datafile, 'cusack', 
                                        dataset, in_field=True,
                                        missid=20000)
-embed(header='test_vmp 19')
+#embed(header='test_vmp 19')
 
 #s8996 = load_idg.load_raw(datafile, dataset, in_field=True)
 

@@ -2,6 +2,9 @@
 
 import glob
 import numpy as np
+import os
+
+apath = os.getenv('ARCTERX')
 
 import pytest
 
@@ -13,6 +16,6 @@ from IPython import embed
 dataset = 'ARCTERX-Leg2'
 
 def test_binned_slocumb():
-    datafile = '/home/xavier/Projects/Oceanography/data/ARCTERX/gliders/slocumb/osu685.l3.nc'
+    datafile = os.path.join(apath, 'gliders/slocumb/osu685.l3.nc')
     pData = SlocumbData.from_binned_file(datafile, 'slocumb', dataset,
                                       missid=60000, in_field=True)

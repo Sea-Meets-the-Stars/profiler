@@ -2,6 +2,9 @@
 
 import glob
 import numpy as np
+import os
+
+apath = os.getenv('ARCTERX')
 
 import pytest
 
@@ -12,7 +15,7 @@ from IPython import embed
 dataset = 'ARCTERX-Leg2'
 
 #def test_binned_flip():
-datafile = '/home/xavier/Projects/Oceanography/data/ARCTERX/Floats/Flip/4006.mat'
+datafile = os.path.join(apath, 'Floats/Flip/4006.mat')
 s33 = floatdata.FlipData.from_binned_file(
         datafile, 'idg', dataset, in_field=True)
 
