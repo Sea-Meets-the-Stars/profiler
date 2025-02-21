@@ -1,3 +1,4 @@
+""" methods related to the IDG at SIO """
 import pymatreader
 
 import numpy as np
@@ -6,6 +7,14 @@ from IPython import embed
 
 
 def load_raw(datafile:str):
+    """ Load raw data from a file
+
+    Args:
+        datafile (str): The path to the data file.
+
+    Returns:
+        dict, dict: The data dictionary and the dictionary of arrays.
+    """
 
     # Load
     f = pymatreader.read_mat(datafile)

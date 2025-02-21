@@ -16,6 +16,18 @@ from IPython import embed
 
 def set_profiler(profiler:"ProfilerData", 
                  key:str, data, bin_style:str, gdi:np.ndarray=None):
+    """ Set a profiler attribute from a binned dataset
+
+    Args:
+        profiler (ProfilerData): The profiler object
+        key (str): The key to set
+        data (_type_): The data object
+        bin_style (str): The binning style
+        gdi (np.ndarray, optional): The good data indices
+
+    Raises:
+        IOError: If the data type is not recognized
+    """
 
     if isinstance(data[key], xarray.core.dataarray.DataArray):
         idata = data[key].values
@@ -36,7 +48,20 @@ def set_profiler(profiler:"ProfilerData",
 
 
 def load(profiler, bin_style:str, in_missid:int=None):
-    """ Load a binned dataset """
+    """ Load a binned dataset 
+
+    The binned dataset is loaded into the profiler object
+
+    Args:
+        profiler (ProfilerData): The profiler object
+        bin_style (str): The binning style
+        in_missid (int, optional): The mission ID
+
+    Raises:
+        IOError: If the binning style is not recognized
+
+
+    """
     
     if bin_style == 'idg':  # Scripps
         if profiler.in_field:
@@ -154,47 +179,3 @@ def load(profiler, bin_style:str, in_missid:int=None):
         key = 'offset'
         profiler.profile_arrays += [key]
         profiler.offset = offset
-
-
-def load_raw(datafile:str):
-
-    # Load
-    f = pymatreader.read_mat(datafile)
-    data = f['data']
-
-    #
-    darrays = {}
-    iprof = {}
-    # Count em
-    nDepths = [len(item) for item in data['t']]
-    Nprof = len(data['t'])
-    Ndepth = np.max(nDepths)
-    
-    # Profile arrays
-    darrays['profile_arrays'] = ['time', 'lat', 'lon']
-    for key in darrays['profile_arrays']:
-        iprof[key] = data[key][:,1]
-
-    # Depth arrays
-    darrays['depth_arrays'] = []
-
-    darrays['profile_depth_arrays'] = ['t', 's', 'depth', 
-                                       'theta', 'sigma', 'rho', 'p']
-    # Profile + Depth arrays
-    for key in darrays['profile_depth_arrays']:
-        if key not in iprof:
-            iprof[key] = np.ones((Nprof, Ndepth))*np.nan
-        for pp in range(Nprof):
-            iprof[key][pp, :nDepths[pp]] = data[key][pp]
-
-    # Qual vals
-    iprof['qual'] = {}
-    for key in ['t', 's', 'depth', 'theta', 'sigma', 'rho', 'p']:
-        if key == 't':
-            iprof['qual'][key] = data['qual'][key]
-        else:
-            iprof['qual'][key] = data['qual']['s']
-
-    # Return
-    return iprof, darrays
-            

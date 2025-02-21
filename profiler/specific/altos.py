@@ -8,7 +8,7 @@ import numpy as np
 import gsw
 from gsw import conversions, density
 
-from profiler.floatdata import EMApexData
+from profiler.floatdata import AltoData
 from profiler import binning
 from profiler.processing import gsw as profiler_gsw 
 
@@ -21,13 +21,20 @@ def load_infield(datafile:str, dataset:str,
                         missid_offset:int=0,
                         add_vel:bool=True):
     """
-    Load the EMApex data for infield processing
+    Load the Alto data for infield processing
 
     Args:
-        datafile (str): The path to the EMApex data file.
+        datafile (str): The path to the Alto float data file.
+        dataset (str): The name of the dataset.
+        binme (bool): Whether to bin the data or not.
+        debug (bool): Whether to run in debug mode.
+        skip_floats (list): A list of floats to skip.
+        missid_offset (int): The offset to add to the float number to get the mission ID.
+        add_vel (bool): Whether to add velocity data to the binned data.
+        
 
     Returns:
-        list: A list of  EMApexData objects containing the data from the given file.
+        list: A list of  Alto objects containing the data from the given file.
     """
     d = pymatreader.read_mat(datafile)
 
@@ -46,7 +53,7 @@ def load_infield(datafile:str, dataset:str,
         print(f"Working on float {flnum}")
         float_dict, darrays = process_alto_float(d['A'], ss)
         # Object me
-        emApex = EMApexData.from_dict(float_dict, darrays, mdict,
+        emApex = AltoData.from_dict(float_dict, darrays, mdict,
                                       dataset, in_field=True)
 
         # Add qual
@@ -65,6 +72,15 @@ def load_infield(datafile:str, dataset:str,
     return pDatas
 
 def process_alto_float(d:dict, ss:int):
+    """ Process a single float from the Alto dataset
+
+    Args:
+        d (dict): dict of Alto data
+        ss (int): index of the float to process
+
+    Returns:
+        dict, dict: The float data and the data arrays
+    """
 
     nprof = len(d['profnum'][ss])
     

@@ -7,13 +7,21 @@ from gsw import conversions, density
 from IPython import embed
 
 def process_dict(ifloat:dict):
+    """ Process the data in the dictionary using gsw
+
+    The fields in the dictionary are:
+        lat, lon, time, s, t, p
+
+    The following fields are added:
+        depth, SA, theta, CT, sigma, rho
+
+    Args:
+        ifloat (dict): The dictionary of data to process.
+    """
 
     for ss in range(ifloat['lat'].size):
-        try:
-            ifloat['depth'][ss,:] = -1*gsw.z_from_p(
-                ifloat['p'][ss,:], ifloat['lat'][ss])
-        except:
-            embed(header='23 of gsw')
+        ifloat['depth'][ss,:] = -1*gsw.z_from_p(
+            ifloat['p'][ss,:], ifloat['lat'][ss])
         # SA
         ifloat['SA'][ss,:] = conversions.SA_from_SP(
             ifloat['s'][ss,:], ifloat['p'][ss,:], 

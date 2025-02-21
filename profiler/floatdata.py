@@ -75,7 +75,7 @@ class EMApexData(SoloData):
 
     scalar_keys:list = []
 
-class EMApexData(SoloData):
+class AltoData(SoloData):
     """
     Class to hold a full, standard EM Apex
     """
