@@ -64,6 +64,7 @@ class ProfilerPairs:
                  max_dist:float=None, max_time:float=None,
                  from_scratch:bool=True, avoid_same_glider:bool=True,
                  randomize:bool=True,
+                 remove_nans:bool=False,
                  debug:bool=False):
         """ Object to generate and hold pairs of 
         measurements from profilers
@@ -79,6 +80,7 @@ class ProfilerPairs:
         self.max_time = max_time
         self.avoid_same_glider = avoid_same_glider
         self.debug = debug
+        self.remove_nans = remove_nans
 
         self.randomize = randomize
 
@@ -99,6 +101,10 @@ class ProfilerPairs:
         # Other variables
         self.dS = None
         self.dT = None
+
+        # Expunge NaNs
+        if self.remove_nans:
+            self.expunge_NaN()
 
         # Calculate dists
         self.calc_dist()
@@ -158,8 +164,21 @@ class ProfilerPairs:
             profiler.dist = dist
             profiler.offset = offset
 
-        if self.debug:
-            embed(header='162 of pairs')
+        #if self.debug:
+        #    embed(header='162 of pairs')
+
+    def expunge_NaN(self):
+
+        # Deal with NaN's in the time, lat, lon
+        for pdata in self.pdata:
+            data_arrays = pdata.darrays
+            #
+            ok = np.isfinite(pdata.time) & np.isfinite(pdata.lat) & np.isfinite(pdata.lon)
+            # Save only the ok ones
+            for key in data_arrays['profile_arrays']:
+                setattr(pdata, key, getattr(pdata, key)[ok])
+            for key in data_arrays['profile_depth_arrays']:
+                setattr(pdata, key, getattr(pdata, key)[ok])
 
     def generate_pairs(self, max_dist:float=None, max_time:float=None, 
                        from_scratch:bool=True, avoid_same_glider:bool=True):
@@ -212,6 +231,15 @@ class ProfilerPairs:
             neg = dt < 0.
 
             if self.randomize:
+                if self.debug:
+                    nzero = np.sum(dt == 0.)
+                    tzero = np.where(dt == 0.)
+                    bad = tzero[0] != tzero[1]
+                    # pandas me for ease
+                    bad_df = pandas.DataFrame(
+                        dict(i0=tzero[0][bad], 
+                             i1=tzero[1][bad]))
+                    embed(header='235 of profilepairs')
                 assert np.sum(neg) + np.sum(pos) == (dt.size - t.size)
 
             tcut_high = dt < max_time
@@ -246,16 +274,17 @@ class ProfilerPairs:
             self.idx0 = idx[0]
             self.idx1 = idx[1]
 
-        # debug
-        if self.debug:
-            print("Debugging!!!!!")
-            embed(header='252 of profilepairs')
 
         if avoid_same_glider:
             keep = self.data('missida', 0) != self.data('missida', 1)
             # Parse
             self.idx0 = self.idx0[keep]
             self.idx1 = self.idx1[keep]
+
+        # debug
+        if self.debug:
+            print("Debugging!!!!!")
+            embed(header='280 of profilepairs')
 
         # Calculate standard stats
         self.update()

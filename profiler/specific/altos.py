@@ -85,6 +85,12 @@ def process_alto_float(d:dict, ss:int):
     ifloat['lat'] = (d['lat_beg'][ss]+d['lat_end'][ss])/2.
     ifloat['lon'] = (d['lon_beg'][ss]+d['lon_end'][ss])/2.
 
+    # NaN out the bad profiles
+    bad = np.zeros(nprof, dtype=bool)
+    bad[d['j_badprofiles'][ss] - 1] = True
+    for key in darrays['profile_arrays']:
+        ifloat[key][bad] = np.nan
+
     # Depth arrays
     darrays['depth_arrays'] = []
 
