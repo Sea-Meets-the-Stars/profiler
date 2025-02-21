@@ -11,7 +11,7 @@ from IPython import embed
 def bin_profilerdata(pdata:"ProfilerData", 
                      pmin:float=10, pstep:float=10, 
                      pmax:float=200., pd:str='d', 
-                     exclude='bad', add_vel:bool=True):
+                     exclude='bad'):
     """
     Bins oceanographic data in pressure or depth on the grid [pmin:pstep:pmax].
     
@@ -32,8 +32,7 @@ def bin_profilerdata(pdata:"ProfilerData",
     
     Returns:
     --------
-    bindata : dict
-        Dictionary containing binned data
+    bData : ProfilerData object
     """
     
     # Define flags
