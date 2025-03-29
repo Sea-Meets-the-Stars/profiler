@@ -1,7 +1,8 @@
 
 from profiler.floatdata import EMApexData
 
-import pymatreader
+from profiler.loading.pymatreader import pymatreader
+#import pymatreader
 
 import numpy as np
 

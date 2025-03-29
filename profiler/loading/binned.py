@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-import pymatreader
+from profiler.loading.pymatreader import pymatreader
 import xarray
 import pandas
 
