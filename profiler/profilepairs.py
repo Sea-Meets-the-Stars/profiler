@@ -507,6 +507,7 @@ class ProfilerPairs:
         err_S3 = []
 
         avg_r = []
+        # TODO -- digitize this!!
         for ss in range(rbins.size-1):
             in_r = (self.r > rbins[ss]) & (self.r <= rbins[ss+1])
             #
