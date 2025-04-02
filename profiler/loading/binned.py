@@ -89,7 +89,7 @@ def load(profiler, bin_style:str, in_missid:int=None):
         d_bin['t'] = d_bin['T']
         d_bin['s'] = d_bin['S']
         d_bin['sigma'] = d_bin['sigma_t']
-    elif bin_style == 'slocumb': # OSU Jesse Cusack (VMP)
+    elif bin_style == 'slocum': # OSU Jesse Cusack (VMP)
         d_bin = xarray.load_dataset(profiler.datafile)
         d_bin['depth'] = d_bin.depth.values
         # Time

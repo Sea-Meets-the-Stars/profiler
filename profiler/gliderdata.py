@@ -96,11 +96,11 @@ class SprayData(profilerdata.ADCPData):
         return r_s
 
 
-class SlocumbData(profilerdata.ProfilerData):
+class SlocumData(profilerdata.ProfilerData):
     """
-    Class to hold a full, standard Spray
+    Class to hold a full, standard Slowcum glider
     """
-    platform = 'Slocumb'
+    platform = 'Slocum'
 
     in_field:bool = None
 
