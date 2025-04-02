@@ -23,7 +23,9 @@ setup_keywords['requires'] = ['Python (>3.10.0)']
 setup_keywords['install_requires'] = [
     'seaborn', 'pyarrow', 'scikit-learn', 'scikit-image', 'tqdm', 
     'cftime', 'bokeh', 'xarray', 'h5netcdf', 
-    'importlib-metadata', 'pytest', 'pymatreader']  # + remote_sensing
+    'setuptools-scm', 'netCDF4', 'numpy', 'pandas',
+    'importlib-metadata', 'pytest']
+    #'pymatreader']  # We have our own version of pymatreader
 setup_keywords['zip_safe'] = False
 setup_keywords['use_2to3'] = False
 setup_keywords['packages'] = find_packages()

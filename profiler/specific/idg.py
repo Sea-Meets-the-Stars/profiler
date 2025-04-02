@@ -1,5 +1,6 @@
 """ methods related to the IDG at SIO """
-import pymatreader
+#import pymatreader
+from profiler.loading.pymatreader import pymatreader
 
 import numpy as np
 
