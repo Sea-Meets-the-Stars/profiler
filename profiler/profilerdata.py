@@ -199,7 +199,7 @@ class ProfilerData:
     @property
     def meta_dict(self):
         mdict = {}
-        for attr in self.meta_keys(): #['missid', 'platform', 'pi', 'pdict', 'dataset', 'datafile']:
+        for attr in self.meta_keys: #['missid', 'platform', 'pi', 'pdict', 'dataset', 'datafile']:
             if hasattr(self, attr):
                 mdict[attr] = getattr(self, attr)
         return mdict
@@ -260,6 +260,7 @@ class ProfilerData:
         """ Return the representation of the CTDData object """
         rstr_meta = []
         rstr_meta += [f"{self.__class__.__name__} object for {self.dataset}\n"]
+        rstr_meta += [f"  Mission ID: {self.missid}\n"]
         rstr_meta += [f"  Number of profiles: {self.Nprof}\n"]
         rstr_meta += [f"  Time range: {self.ptime.min()} to {self.ptime.max()}\n"]
 

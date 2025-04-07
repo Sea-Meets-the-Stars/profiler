@@ -8,17 +8,31 @@ apath = os.getenv('ARCTERX')
 import pytest
 
 from profiler import gliderdata
+from profiler import profilers_io
+from profiler import io as p_io
 
 from IPython import embed
 
 dataset = 'ARCTERX-Leg2'
 apath = os.path.join(os.getenv('OS_ARCTERX'), '2025_IOP')
 
-# Load
-datafile = os.path.join(apath, 'gliders/spray/0033.mat')
-s33 = gliderdata.SprayData.from_binned_file(
+def test_write_tojson():
+    # Load
+    datafile = os.path.join(apath, 'gliders/spray/0033.mat')
+    s33 = gliderdata.SprayData.from_binned_file(
+            datafile, 'idg', dataset, in_field=True,
+            extra_dict={'adcp_on': False})
+
+    # Write
+    s33.write('tst.json')
+
+# Write profilers
+datafiles = glob.glob(os.path.join(apath, 'gliders/spray/*.mat'))
+sprays = []
+for datafile in datafiles:
+    s = gliderdata.SprayData.from_binned_file(
         datafile, 'idg', dataset, in_field=True,
         extra_dict={'adcp_on': False})
+    sprays.append(s)
 
-# Write
-s33.write('tst.json')
+profilers_io.write_profilers(sprays, 'tst_profilers.json')

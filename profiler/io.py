@@ -5,6 +5,7 @@ import gzip
 
 import numpy as np
 
+from IPython import embed
 
 
 def grab_ext(filename:str):
@@ -66,9 +67,18 @@ def jsonify(obj, debug=False):
         for i,item in enumerate(obj):
             obj[i] = jsonify(item, debug=debug)
         obj = tuple(obj)
+    #else:
+    #    if debug:
+    #        embed(header='72 of ')
+            
 
     if debug:
-        print(type(obj))
+        #print(type(obj))
+        # TODO - add None type
+        if not isinstance(obj, (list,dict,str,int,float,type(None))):
+            print(f"Bad type: {type(obj)}")
+            embed(header='79 of io.py')
+
     return obj
 
 
