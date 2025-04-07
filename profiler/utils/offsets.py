@@ -1,5 +1,10 @@
+""" Python functions for calculating offsets and distances
+    from a line 
+"""
+
 import numpy as np
 
+from IPython import embed
 
 def calc_dist_offset(lons:np.ndarray, lats:np.ndarray,
                      endpoints:tuple):
@@ -45,6 +50,10 @@ def calc_dist_offset(lons:np.ndarray, lats:np.ndarray,
     # Calculate dist, offset in new coordinate system by rotating
     z=dx+1j*dy
     zhat=z*np.exp(-1j*theta)
+
+    if np.any(np.isnan(zhat)):
+        embed(header='NaN in zhat')
+        raise ValueError('calc_dist_offset: NaN in zhat')
 
     # Finish
     dist=np.real(zhat)

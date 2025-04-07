@@ -18,6 +18,8 @@ def write_profilers(profilers:list, outfile:str):
         if profiler.missid in big_dict[profiler.dataset].keys():
             raise IOError(f"missid={profiler.missid} already in the dict!!")
         big_dict[profiler.dataset][profiler.missid] = odict
+        # Add the profiler platform
+        big_dict[profiler.dataset]['platform'] = profiler.platform
 
     # Finish
     jdict = p_io.jsonify(big_dict, debug=True)

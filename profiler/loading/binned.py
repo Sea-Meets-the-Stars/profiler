@@ -82,13 +82,12 @@ def load(profiler, bin_style:str, in_missid:int=None):
         d = pymatreader.read_mat(profiler.datafile, 
                                  verify_compressed_data_integrity=True)  # FAILED
         d_bin = d['pr']
-        #embed(header='47 of binned')
         d_bin['time'] = (1735689600 +  # This is Unix time for 2025-01-01 00:00:00 UTC
             (d_bin['t'] * 86400)) # seconds
         # Rename me + transpose
-        d_bin['t'] = d_bin['T']
-        d_bin['s'] = d_bin['S']
-        d_bin['sigma'] = d_bin['sigma_t']
+        d_bin['t'] = d_bin['T'].astype(np.float64) # Deals with bogus complex numbers
+        d_bin['s'] = d_bin['S'].astype(np.float64) # Deals with bogus complex numbers
+        d_bin['sigma'] = d_bin['sigma_t'].astype(np.float64) # Deals with bogus complex numbers
     elif bin_style == 'slocum': # OSU Jesse Cusack (VMP)
         d_bin = xarray.load_dataset(profiler.datafile)
         d_bin['depth'] = d_bin.depth.values

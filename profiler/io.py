@@ -22,7 +22,7 @@ def grab_ext(filename:str):
 
 
 
-def jsonify(obj, debug=False):
+def jsonify(obj, debug=True):
     """ Recursively process an object so it can be serialised in json
     format.
 
