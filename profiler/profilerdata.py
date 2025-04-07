@@ -8,6 +8,7 @@ from abc import ABCMeta, abstractmethod
 import pandas
 
 from profiler.loading import binned
+from profiler import io as p_io
 
 from IPython import embed
 
@@ -35,6 +36,7 @@ class ProfilerData:
     # glider offset
     dist = None
     offset = None
+    data_keys:list = []
 
     # Meta
     missid:int = None
@@ -42,6 +44,7 @@ class ProfilerData:
     pi:str = None  # Principal Invesitgator
     pdict:dict = None # dict on the profiler
     dataset = None  # The name of the dataset
+    meta_keys:list = []
 
     # I/O
     datafile:str = None
@@ -148,6 +151,7 @@ class ProfilerData:
         # Meta dict
         for key in mdict.keys():
             setattr(pData, key, mdict[key])
+        pData.meta_keys = list(mdict.keys())
 
         # Data arrays
         for key in darrays.keys():
@@ -195,7 +199,7 @@ class ProfilerData:
     @property
     def meta_dict(self):
         mdict = {}
-        for attr in ['missid', 'platform', 'pi', 'pdict', 'dataset', 'datafile']:
+        for attr in self.meta_keys(): #['missid', 'platform', 'pi', 'pdict', 'dataset', 'datafile']:
             if hasattr(self, attr):
                 mdict[attr] = getattr(self, attr)
         return mdict
@@ -279,6 +283,48 @@ class ProfilerData:
             rstr_var += [f"    {key}: {getattr(self, key).shape}\n"]
         #
         return rstr_var
+
+    def to_dict(self):
+        out_dict = {}
+
+        # Meta
+        for key in self.meta_keys:
+            out_dict[key] = getattr(self, key)
+
+        # Data
+        for key in self.data_keys:
+            out_dict[key] = getattr(self, key)
+
+        # Scalars
+        for key in self.scalar_keys:
+            out_dict[key] = getattr(self, key)
+
+        # Arrays
+        for karray in [self.depth_arrays,
+                      self.profile_arrays, 
+                      self.profile_depth_arrays]:
+            for key in karray:
+                out_dict[key] = getattr(self, key)
+
+        # Key me
+        for keys in ['meta_keys', 'data_keys', 'scalar_keys']:
+            out_dict[keys] = getattr(self, keys)
+
+        return out_dict
+
+    def write(self, outfile:str, gzip:bool=False):
+        # dict me
+        odict = self.to_dict()
+        # JSON
+        jdict = p_io.jsonify(odict)
+        # Write`
+        p_io.savejson(outfile, jdict, overwrite=True)
+        # gzip?
+        if gzip:
+            outfile += '.gz'
+            raise NotImplementedError("Ooops")
+        # done
+        print(f'Wrote: {outfile}')
 
     # Combine
     def __repr__(self):

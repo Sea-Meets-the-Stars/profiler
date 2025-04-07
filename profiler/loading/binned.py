@@ -160,6 +160,7 @@ def load(profiler, bin_style:str, in_missid:int=None):
         else:
             missid = int(os.path.basename(profiler.datafile).split('.')[0])
         setattr(profiler, key, missid)
+        profiler.meta_keys.append(key)
 
         # Generate dist and offset
         #  dist is distance to the North from the median lon (km)
@@ -174,8 +175,11 @@ def load(profiler, bin_style:str, in_missid:int=None):
         profiler.profile_arrays += [key]
         dist, offset = offsets.calc_dist_offset(
             profiler.lon, profiler.lat, (lonendpts, latendpts))
-        # Fill in
         profiler.dist = dist
+        profiler.data_keys.append(key)
+
+        # Offset
         key = 'offset'
         profiler.profile_arrays += [key]
         profiler.offset = offset
+        profiler.data_keys.append(key)
