@@ -24,7 +24,7 @@ setup_keywords['install_requires'] = [
     'seaborn', 'pyarrow', 'scikit-learn', 'scikit-image', 'tqdm', 
     'cftime', 'bokeh', 'xarray', 'h5netcdf', 
     'setuptools-scm', 'netCDF4', 'numpy', 'pandas',
-    'importlib-metadata', 'pytest']
+    'importlib-metadata', 'pytest', 'ipython', 'gsw']
     #'pymatreader']  # We have our own version of pymatreader
 setup_keywords['zip_safe'] = False
 setup_keywords['use_2to3'] = False

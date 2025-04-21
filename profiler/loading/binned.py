@@ -103,6 +103,11 @@ def load(profiler, bin_style:str, in_missid:int=None):
         d_bin['lon'] = d_bin['lon'].mean(dim='z')
     elif bin_style == 'seaglider': # Up/down measurements by Luc Rainville
         d = xarray.load_dataset(profiler.datafile)
+        # Reduce dataset to finite time_dive values
+        if np.any(np.isnan(d.time_dive)):
+            print("Warning: NaN values in time_dive, dropping those profiles")
+            # If there are NaN values, drop them
+            d = d.where(np.isfinite(d.time_dive), drop=True)
         # Dummy ds
         new_coords = dict(profile_id=d.profile.values,
                           z=d.z_data_point.values)
@@ -130,6 +135,11 @@ def load(profiler, bin_style:str, in_missid:int=None):
         for key in ['t', 's']:
             d_bin[key] = (['profile_id','z'], dsav[key])
         d_bin['depth'] = d_bin.z.values
+        # Time
+        ptimes = [pandas.Series(item).mean().timestamp() 
+                      for item in pandas.to_datetime(d_bin.time.values)]
+        d_bin = d_bin.drop_vars('time')
+        d_bin['time'] = (['profile_id'], ptimes)
     else: 
         raise IOError(f'Bad reader {profiler.reader}')
 

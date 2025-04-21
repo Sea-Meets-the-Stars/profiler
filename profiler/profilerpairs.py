@@ -218,7 +218,7 @@ class ProfilerPairs:
             try:
                 t = np.concatenate([item.time for item in self.pdata])
             except:
-                embed(header='159 of profilepairs')
+                embed(header='221 of profilepairs')
             dt = np.zeros((t.size, t.size))
             for kk in range(t.size):
                 dt[kk] = (t[kk] - t)/3600.  # hours
