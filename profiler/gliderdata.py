@@ -140,6 +140,6 @@ class SeagliderData(profilerdata.ProfilerData):
         profilerdata.ProfilerData.__init__(self, datafile, dataset)
 
         self.in_field = in_field
-        self.profile_arrays = ['lat_dive', 'lon_dive', 'time_dive']
+        self.profile_arrays = ['lat', 'lon', 'time']
         self.depth_arrays = ['depth']
-        self.profile_depth_arrays = ['s', 't', 'SA']
+        self.profile_depth_arrays = ['s', 't']

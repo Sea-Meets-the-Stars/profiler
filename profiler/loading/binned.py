@@ -102,11 +102,10 @@ def load(profiler, bin_style:str, in_missid:int=None):
         d_bin['lat'] = d_bin['lat'].mean(dim='z')
         d_bin['lon'] = d_bin['lon'].mean(dim='z')
     elif bin_style == 'seaglider': # Up/down measurements by Luc Rainville
-        embed(header='seaglider 105')
         d = xarray.load_dataset(profiler.datafile)
         # Dummy ds
-        new_coords = dict(profile=d.profile.values,
-                          z_data_point=d.z_data_point.values)
+        new_coords = dict(profile_id=d.profile.values,
+                          z=d.z_data_point.values)
         d_bin = xarray.Dataset(coords=new_coords)
         # Grab em
         dives = np.unique(d.dive.values)
@@ -123,11 +122,14 @@ def load(profiler, bin_style:str, in_missid:int=None):
                     dsav[new_key] = []
                 # Get the dives
                 dsav[new_key].append(tmp[old_key].values)
-        # Time
-        ptimes = [pandas.Series(item).mean().timestamp() for item in pandas.to_datetime(d_bin.time.values)]
-        d_bin['time'] = (['profile'], ptimes)
-        # Rename me + transpose
-        d_bin['t'] = d_bin['temp'].astype(np.float64)
+
+        # Time, lat, lon
+        for key in ['time', 'lat', 'lon']:
+            d_bin[key] = (['profile_id'], d[f'{key}_dive'].values)
+        #embed(header='seaglider 129')
+        for key in ['t', 's']:
+            d_bin[key] = (['profile_id','z'], dsav[key])
+        d_bin['depth'] = d_bin.z.values
     else: 
         raise IOError(f'Bad reader {profiler.reader}')
 
@@ -181,6 +183,9 @@ def load(profiler, bin_style:str, in_missid:int=None):
         elif profiler.__class__.__name__ == 'EMApexData':
             base = os.path.basename(profiler.datafile).split('.')[0]
             missid = int(base.split('F')[1])
+        elif profiler.__class__.__name__ == 'SeagliderData':
+            base = os.path.basename(profiler.datafile).split('.')[0]
+            missid = int(base.split('_')[0][2:])
         #elif profiler.__class__.__name__ in ['VMPData', 'TriaxusData']:
         #    missid = in_missid
         else:
