@@ -101,6 +101,29 @@ def load(profiler, bin_style:str, in_missid:int=None):
         # Average lat, lon to get a single value
         d_bin['lat'] = d_bin['lat'].mean(dim='z')
         d_bin['lon'] = d_bin['lon'].mean(dim='z')
+    elif bin_style == 'seaglider': # Up/down measurements by Luc Rainville
+        embed(header='seaglider 105')
+        d = xarray.load_dataset(profiler.datafile)
+        dives = np.unique(d.dive.values)
+        d_bin = {}
+        # Average the dives
+        for new_key, old_key in zip(['t', 's', 'lat'], 
+                                    ['T', 'S', 'lat']):
+            vals = []
+            for dive in dives:
+                # Get the dives
+                dtmp = d.where(d.dive == dive, drop=True)
+                vals.append(dtmp[old_key].mean(dim='half_profile_data_point').values)
+
+            embed(header='seaglider 117')
+            d_bin[new_key] = (['dive'], vals)
+
+            
+        # Time
+        ptimes = [pandas.Series(item).mean().timestamp() for item in pandas.to_datetime(d_bin.time.values)]
+        d_bin['time'] = (['profile'], ptimes)
+        # Rename me + transpose
+        d_bin['t'] = d_bin['temp'].astype(np.float64)
     else: 
         raise IOError(f'Bad reader {profiler.reader}')
 

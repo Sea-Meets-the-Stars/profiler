@@ -122,7 +122,7 @@ class SlocumData(profilerdata.ProfilerData):
 
 class SeagliderData(profilerdata.ProfilerData):
     """
-    Class to hold a full, standard Slowcum glider
+    Class to hold a full, standard Seaglider glider
     """
     platform = 'Seaglider'
 
