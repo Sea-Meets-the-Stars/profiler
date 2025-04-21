@@ -119,3 +119,27 @@ class SlocumData(profilerdata.ProfilerData):
         self.profile_arrays = ['lat', 'lon', 'time']
         self.depth_arrays = ['depth']
         self.profile_depth_arrays = ['s', 't', 'SA']
+
+class SeagliderData(profilerdata.ProfilerData):
+    """
+    Class to hold a full, standard Slowcum glider
+    """
+    platform = 'Seaglider'
+
+    in_field:bool = None
+
+    scalar_keys:list = []
+    
+    # Loader
+    loader_dict = dict(t='T', s='S')
+
+    def __init__(self, datafile:str, dataset:str,
+                    in_field:bool=False, binned:bool=False):
+
+        # Init
+        profilerdata.ProfilerData.__init__(self, datafile, dataset)
+
+        self.in_field = in_field
+        self.profile_arrays = ['lat_dive', 'lon_dive', 'time_dive']
+        self.depth_arrays = ['depth']
+        self.profile_depth_arrays = ['s', 't', 'SA']
