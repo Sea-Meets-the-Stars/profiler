@@ -104,21 +104,25 @@ def load(profiler, bin_style:str, in_missid:int=None):
     elif bin_style == 'seaglider': # Up/down measurements by Luc Rainville
         embed(header='seaglider 105')
         d = xarray.load_dataset(profiler.datafile)
+        # Dummy ds
+        new_coords = dict(profile=d.profile.values,
+                          z_data_point=d.z_data_point.values)
+        d_bin = xarray.Dataset(coords=new_coords)
+        # Grab em
         dives = np.unique(d.dive.values)
-        d_bin = {}
+        dsav = {}
+
         # Average the dives
-        for new_key, old_key in zip(['t', 's', 'lat'], 
-                                    ['T', 'S', 'lat']):
-            vals = []
-            for dive in dives:
+        for ss, dive in enumerate(dives):
+            dtmp = d.where(d.dive == dive, drop=True)
+            tmp = dtmp.mean('half_profile_data_point')
+
+            for new_key, old_key in zip(['t', 's'], 
+                                    ['T', 'S']):
+                if ss == 0:
+                    dsav[new_key] = []
                 # Get the dives
-                dtmp = d.where(d.dive == dive, drop=True)
-                vals.append(dtmp[old_key].mean(dim='half_profile_data_point').values)
-
-            embed(header='seaglider 117')
-            d_bin[new_key] = (['dive'], vals)
-
-            
+                dsav[new_key].append(tmp[old_key].values)
         # Time
         ptimes = [pandas.Series(item).mean().timestamp() for item in pandas.to_datetime(d_bin.time.values)]
         d_bin['time'] = (['profile'], ptimes)
