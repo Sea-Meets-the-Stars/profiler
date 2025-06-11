@@ -64,11 +64,13 @@ def load(profiler, bin_style:str, in_missid:int=None):
     """
     
     if bin_style == 'idg':  # Scripps
-        if profiler.in_field:
-            base_key = 'bindata'
+        d = pymatreader.read_mat(profiler.datafile)
+        if 'bindata' in d:
+            d_bin = d['bindata']
+        elif 'ctd' in d:
+            d_bin = d['ctd']
         else:
-            base_key = 'ctd'
-        d_bin = pymatreader.read_mat(profiler.datafile)[base_key]
+            raise IOError(f'Bad binning style {bin_style} for {profiler.datafile}')
     elif bin_style == 'cusack': # OSU Jesse Cusack (VMP)
         d_bin = xarray.load_dataset(profiler.datafile)
         d_bin['depth'] = d_bin.bin.values
@@ -150,7 +152,11 @@ def load(profiler, bin_style:str, in_missid:int=None):
     if not profiler.in_field:
         profiler.scalar_keys += ['x0', 'x1', 'y0', 'y1']
     for key in profiler.scalar_keys:
-        set_profiler(profiler, key, d_bin, bin_style)
+        if key in d_bin:
+            # If the key is in the binned data, set it
+            set_profiler(profiler, key, d_bin, bin_style)
+        else:
+            print(f"Warning: {key} not in binned data for {profiler.datafile}")
 
     # Depth arrays
     for key in profiler.depth_arrays:
@@ -158,7 +164,9 @@ def load(profiler, bin_style:str, in_missid:int=None):
 
     # Profile arrays
     if not profiler.in_field:
-        profiler.profile_arrays += ['dist', 'offset']
+        pass
+        # THESE ARE NOT WORKING YET
+        #profiler.profile_arrays += ['dist', 'offset']
     for ss, key in enumerate(profiler.profile_arrays):
         # Set the mask from the first one
         if ss == 0:
@@ -175,15 +183,16 @@ def load(profiler, bin_style:str, in_missid:int=None):
 
     # Profile + depth
     if profiler.has_adcp and profiler.adcp_on:
-        profiler.profile_depth_arrays += ['udop', 'vdop', 
-                                    'udopacross', 'udopalong']
+        profiler.profile_depth_arrays += ['udop', 'vdop']#, 'udopacross', 'udopalong']
     for key in profiler.profile_depth_arrays:
         try:
             set_profiler(profiler, key, d_bin, bin_style, gdi=gdi)
         except:
-            embed(header='112 of binned')
+            print("Warning: Could not set key", key)
+            #embed(header='192 of binned')
 
-    if profiler.in_field:
+    #if profiler.in_field:
+    if True:
         # Mission ID
         key = 'missid'
         #profiler.profile_arrays += [key]
@@ -198,6 +207,8 @@ def load(profiler, bin_style:str, in_missid:int=None):
             missid = int(base.split('_')[0][2:])
         #elif profiler.__class__.__name__ in ['VMPData', 'TriaxusData']:
         #    missid = in_missid
+        elif profiler.__class__.__name__ == 'SprayData':
+            missid = int(os.path.basename(profiler.datafile).split('_')[0])
         else:
             missid = int(os.path.basename(profiler.datafile).split('.')[0])
         setattr(profiler, key, missid)
