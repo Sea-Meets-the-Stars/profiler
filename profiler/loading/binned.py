@@ -60,9 +60,7 @@ def load(profiler, bin_style:str, in_missid:int=None):
     Raises:
         IOError: If the binning style is not recognized
 
-
     """
-    
     if bin_style == 'idg':  # Scripps
         d = pymatreader.read_mat(profiler.datafile)
         if 'bindata' in d:

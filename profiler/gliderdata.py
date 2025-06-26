@@ -49,7 +49,9 @@ def load_dataset(dataset:str):
 
     # Survey specific cuts
     if dataset == 'Calypso2022':
-        raise IOError("FIX THIS")
+        embed(header='Calypso2022 52 of gliderdata.py')
+        maxt = np.max(self.time)
+        mint = np.min(self.time)
         goodt = cData.time < (maxt - 12*24*3600)
         goodt &= (cData.time > (mint + 3*24*3600))
         cData = cData.profile_subset(np.where(goodt)[0], init=False)
