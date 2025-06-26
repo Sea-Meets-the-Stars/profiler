@@ -591,7 +591,7 @@ class ProfilerPairs:
         """ Return the representation of the CTDData object """
         rstr = f"ProfilerPair object for the following datasets:\n"
         for item in self.pdata:
-            rstr += f" {item.dataset}, {item.__class__.__name__}\n"
+            rstr += f" {item.dataset}, {item.__class__.__name__} {item.missid} \n"
         rstr += f"  Number of pairs: {self.npairs}\n"
         t = pandas.to_datetime(np.concatenate([item.time for item in self.pdata]), unit='s')
         rstr += f"  Time range: {t.min()} to {t.max()}\n"

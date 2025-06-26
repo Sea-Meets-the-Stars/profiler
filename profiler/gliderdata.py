@@ -6,9 +6,8 @@ import numpy as np
 import warnings
 import xarray
 
+from profiler.loading.pymatreader import pymatreader
 from profiler import profilerdata
-from profiler.loading import binned
-from profiler.loading import load_raw
 
 from IPython import embed
 
@@ -44,17 +43,28 @@ def load_dataset(dataset:str):
     elif dataset == 'Calypso2022':
         dfile = os.path.join(
             os.getenv('OS_SPRAY'), 'Calypso', 'calypso2022_ctd.mat')
+        # Loop on mission IDs
+        d = pymatreader.read_mat(dfile)
+        mission_ids = np.unique(d['ctd']['missid'])
+        pDatas = []
+        for missid in mission_ids:
+            sData =  SprayData.from_binned_file(dfile, 'idg', dataset, in_field=False,
+                                                missid=missid)
+
+            # Survey specific cuts
+            maxt = np.max(sData.time)
+            mint = np.min(sData.time)
+            goodt = sData.time < (maxt - 12*24*3600)
+            goodt &= (sData.time > (mint + 3*24*3600))
+            #embed(header='Cutting data 59')
+            sData = sData.profile_subset(np.where(goodt)[0], init=False)
+            # Good velocity data
+            sData = sData.cut_on_good_velocity(init=False)
+            # Save
+            pDatas.append(sData)
+
     else: 
         raise ValueError(f"Dataset {dataset} not supported")
-
-    # Survey specific cuts
-    if dataset == 'Calypso2022':
-        embed(header='Calypso2022 52 of gliderdata.py')
-        maxt = np.max(self.time)
-        mint = np.min(self.time)
-        goodt = cData.time < (maxt - 12*24*3600)
-        goodt &= (cData.time > (mint + 3*24*3600))
-        cData = cData.profile_subset(np.where(goodt)[0], init=False)
 
     return pDatas
 
@@ -73,14 +83,15 @@ class SprayData(profilerdata.ADCPData):
                     in_field:bool=False):
 
         # Init
-        self.profile_arrays = ['time', 'lat', 'lon', 'time']
+        self.profile_arrays = ['time', 'lat', 'lon']
         self.depth_arrays = ['depth']
-        self.profile_depth_arrays = ['s', 't', 'theta', 'sigma']
+        self.profile_depth_arrays = ['s', 't']#, 'theta', 'sigma']
 
         self.in_field = in_field
         if not self.in_field:
-            adcp_on:bool=True
-        self.profile_depth_arrays += ['theta']
+            self.adcp_on:bool=True
+            self.profile_arrays += ['dist', 'offset']
+            #
 
         # Init
         profilerdata.ADCPData.__init__(self, datafile, dataset)

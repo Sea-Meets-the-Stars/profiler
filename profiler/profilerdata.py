@@ -251,7 +251,11 @@ class ProfilerData:
         for key in self.profile_arrays:
             setattr(pData, key, getattr(self, key)[profiles])
         for key in self.profile_depth_arrays:
-            setattr(pData, key, getattr(self, key)[:, profiles])
+            #try:
+            setattr(pData, key, getattr(self, key)[profiles])
+            #setattr(pData, key, getattr(self, key)[:, profiles])
+            #except IndexError:
+            #    embed(header=f"Error with {key} in profile_subset")
 
         # Return
         return pData
@@ -365,7 +369,7 @@ class ADCPData(ProfilerData):
         self.adcp_on = adcp_on
         ProfilerData.__init__(self, datafile, dataset)
 
-    def cut_on_good_velocity(self):
+    def cut_on_good_velocity(self, init:bool=True):
         """
         Cuts the glider data based on good velocity values.
 
@@ -376,10 +380,10 @@ class ADCPData(ProfilerData):
         # Cut on velocity
         good = np.isfinite(self.udop) & np.isfinite(self.vdop)
         idx = np.where(good)
-        gd_profiles = np.unique(idx[1])
+        gd_profiles = np.unique(idx[0])
 
         # Cut
-        gData = self.profile_subset(gd_profiles)
+        gData = self.profile_subset(gd_profiles, init=init)
 
         # Return
         return gData

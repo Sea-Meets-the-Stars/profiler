@@ -36,6 +36,8 @@ def set_profiler(profiler:"ProfilerData",
             idata = data[key].T
         else:
             idata = data[key]
+    elif isinstance(data[key], (float, int, str)): # Scalars
+        idata = data[key]
     else:
         embed(header='16 of binned')
         raise IOError("update!!")
@@ -172,12 +174,14 @@ def load(profiler, bin_style:str, in_missid:int=None):
             #    gdi = np.isfinite(d_bin[key].values)
             #else:
             gdi = np.isfinite(d_bin[key])
+            # In mission id?
+            if in_missid is not None:
+                gdi &= (d_bin['missid'] == in_missid)
         try:
             set_profiler(profiler, key, d_bin, bin_style, gdi=gdi)#[key][gdi])
         except:
             embed(header='100 of binned')
 
-    #embed(header='84 of binned')
 
     # Profile + depth
     if profiler.has_adcp and profiler.adcp_on:
@@ -189,8 +193,8 @@ def load(profiler, bin_style:str, in_missid:int=None):
             print("Warning: Could not set key", key)
             #embed(header='192 of binned')
 
-    #if profiler.in_field:
-    if True:
+    # This breaks for Spray + ARCTERX Leg2
+    if profiler.in_field:
         # Mission ID
         key = 'missid'
         #profiler.profile_arrays += [key]
@@ -233,3 +237,9 @@ def load(profiler, bin_style:str, in_missid:int=None):
         profiler.profile_arrays += [key]
         profiler.offset = offset
         profiler.data_keys.append(key)
+
+    # Mission ID
+    if in_missid is not None:
+        key = 'missid'
+        setattr(profiler, key, in_missid)
+        profiler.meta_keys.append(key)
