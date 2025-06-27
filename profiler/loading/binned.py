@@ -216,27 +216,27 @@ def load(profiler, bin_style:str, in_missid:int=None):
         setattr(profiler, key, missid)
         profiler.meta_keys.append(key)
 
-        # Generate dist and offset
-        #  dist is distance to the North from the median lon (km)
-        #  offset is distance to the East from the median lon
-        profiler.med_lon = np.median(profiler.lon)
-        profiler.med_lat = np.median(profiler.lat)
-        latendpts = (profiler.med_lat-1., profiler.med_lat+1.)
-        lonendpts = (profiler.med_lon, profiler.med_lon)
+    # Generate dist and offset
+    #  distE is distance to the North from the median lon (km)
+    #  distN is distance to the East from the median lon
+    profiler.med_lon = np.median(profiler.lon)
+    profiler.med_lat = np.median(profiler.lat)
+    latendpts = (profiler.med_lat-1., profiler.med_lat+1.)
+    lonendpts = (profiler.med_lon, profiler.med_lon)
 
-        # dist
-        key = 'dist'
-        profiler.profile_arrays += [key]
-        dist, offset = offsets.calc_dist_offset(
-            profiler.lon, profiler.lat, (lonendpts, latendpts))
-        profiler.dist = dist
-        profiler.data_keys.append(key)
+    # distE
+    key = 'distE'
+    profiler.profile_arrays += [key]
+    distN, distW = offsets.calc_dist_offset(
+        profiler.lon, profiler.lat, (lonendpts, latendpts))
+    profiler.distE = -1*distW
+    profiler.data_keys.append(key)
 
-        # Offset
-        key = 'offset'
-        profiler.profile_arrays += [key]
-        profiler.offset = offset
-        profiler.data_keys.append(key)
+    # distN
+    key = 'distN'
+    profiler.profile_arrays += [key]
+    profiler.distN = distN
+    profiler.data_keys.append(key)
 
     # Mission ID
     if in_missid is not None:

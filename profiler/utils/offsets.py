@@ -12,15 +12,16 @@ def calc_dist_offset(lons:np.ndarray, lats:np.ndarray,
       for a given line 
 
     Args:
-        line (str): line name
         lons (np.ndarray): longitudes
         lats (np.ndarray): latitudes
-        endpoints (tuple, optional): endpoints of the line. Defaults to None.
+        endpoints (tuple, optional): endpoints of the "line". Defaults to None.
             lonendpts
             latendpts
 
     Returns:
         tuple: dist, offset
+            dist = distance from the start of the line
+            offset = offset from the line (normal)
     """
 
     # Endpoints
@@ -42,6 +43,8 @@ def calc_dist_offset(lons:np.ndarray, lats:np.ndarray,
     dyy = (lat1-lat0)
     dxx = np.cos(1/2*(lat1+lat0)*deg2rad)*(lon1-lon0)
     theta = np.arctan2(dyy,dxx)
+
+    print(f"calc_dist_offset: theta={theta} rad, {theta*180/np.pi} deg")
 
     # Calculate x, y of lon, lat relative to start of line
     dy = (lats-lat0)*deg2km;

@@ -34,8 +34,10 @@ class ProfilerData:
     time = None
 
     # glider offset
-    dist = None
-    offset = None
+    #dist = None
+    #offset = None
+    distE = None  # Eastward distance from the survey midpoint
+    distN = None  # Northward distance from the survey midpoint
     data_keys:list = []
 
     # Meta

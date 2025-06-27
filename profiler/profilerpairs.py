@@ -106,7 +106,7 @@ class ProfilerPairs:
         if self.remove_nans:
             self.expunge_NaN()
 
-        # Calculate dists
+        # Calculate dists for the full survey
         self.calc_dist()
 
         # Pair time
@@ -141,7 +141,11 @@ class ProfilerPairs:
 
     def calc_dist(self):
         """
-        Calculate the distance between the gliders
+        Calculate the distances between the gliders
+
+
+        Use a E,N coordinate system to calculate the distance
+        relative to a S to North line that is the median lon and lat
         """
         # Find max,min lat lon in the profilers
         lat = np.concatenate([item.lat for item in self.pdata])
@@ -150,19 +154,21 @@ class ProfilerPairs:
         self.min_lat = np.nanmin(lat)
         self.max_lon = np.nanmax(lon)
         self.min_lon = np.nanmin(lon)
-        lonendpts = (self.min_lon, self.max_lon)
-        latendpts = (self.min_lat, self.max_lat)
+        self.med_lon = np.nanmedian(lon)
+        self.med_lat = np.nanmedian(lat)
+        latendpts = (self.med_lat-1., self.med_lat+1.)
+        lonendpts = (self.med_lon, self.med_lon)
 
         print(f"Using lonendpts: {lonendpts}")
         print(f"Using latendpts: {latendpts}")
 
         # Calculate the distance from the line connecting those
         for profiler in self.pdata:
-            dist, offset = offsets.calc_dist_offset(
+            distN, distW = offsets.calc_dist_offset(
                 profiler.lon, profiler.lat, (lonendpts, latendpts))
             # Set
-            profiler.dist = dist
-            profiler.offset = offset
+            profiler.distE = -1*distW
+            profiler.distN = distN
 
         #if self.debug:
         #    embed(header='162 of pairs')
@@ -364,11 +370,11 @@ class ProfilerPairs:
 
         """
         # Separations
-        d0 = self.data('dist', 0)
-        d1 = self.data('dist', 1)
+        d0 = self.data('distE', 0)
+        d1 = self.data('distE', 1)
         #
-        o0 = self.data('offset', 0)
-        o1 = self.data('offset', 1)
+        o0 = self.data('distN', 0)
+        o1 = self.data('distN', 1)
 
         # Separation
         self.r = np.sqrt((d0-d1)**2 + (o0-o1)**2)

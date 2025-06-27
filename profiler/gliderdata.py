@@ -83,6 +83,7 @@ class SprayData(profilerdata.ADCPData):
                     in_field:bool=False):
 
         # Init
+        # Existing arrays
         self.profile_arrays = ['time', 'lat', 'lon']
         self.depth_arrays = ['depth']
         self.profile_depth_arrays = ['s', 't']#, 'theta', 'sigma']
@@ -90,7 +91,6 @@ class SprayData(profilerdata.ADCPData):
         self.in_field = in_field
         if not self.in_field:
             self.adcp_on:bool=True
-            self.profile_arrays += ['dist', 'offset']
             #
 
         # Init
