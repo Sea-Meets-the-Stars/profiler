@@ -131,9 +131,9 @@ class SlocumData(profilerdata.ProfilerData):
         self.in_field = in_field
         self.profile_arrays = ['lat', 'lon', 'time']
         self.depth_arrays = ['depth']
-        self.profile_depth_arrays = ['s', 't', 'SA']
+        self.profile_depth_arrays = ['s', 't']#, 'SA']
 
-class SeagliderData(profilerdata.ProfilerData):
+class SeagliderData(profilerdata.ADCPData):
     """
     Class to hold a full, standard Seaglider glider
     """
@@ -156,3 +156,6 @@ class SeagliderData(profilerdata.ProfilerData):
         self.profile_arrays = ['lat', 'lon', 'time']
         self.depth_arrays = ['depth']
         self.profile_depth_arrays = ['s', 't']
+
+        if not self.in_field:
+            self.adcp_on:bool=True

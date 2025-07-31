@@ -71,6 +71,12 @@ def load(profiler, bin_style:str, in_missid:int=None):
             d_bin = d['ctd']
         else:
             raise IOError(f'Bad binning style {bin_style} for {profiler.datafile}')
+        # Deal with OSU velocity
+        if profiler.adcp_on and 'v' in d_bin:
+            # OSU velocity
+            d_bin['udop'] = d_bin['u']
+            d_bin['vdop'] = d_bin['v']
+            embed(header='79 of binned')
     elif bin_style == 'cusack': # OSU Jesse Cusack (VMP)
         d_bin = xarray.load_dataset(profiler.datafile)
         d_bin['depth'] = d_bin.bin.values
@@ -90,7 +96,7 @@ def load(profiler, bin_style:str, in_missid:int=None):
         d_bin['t'] = d_bin['T'].astype(np.float64) # Deals with bogus complex numbers
         d_bin['s'] = d_bin['S'].astype(np.float64) # Deals with bogus complex numbers
         d_bin['sigma'] = d_bin['sigma_t'].astype(np.float64) # Deals with bogus complex numbers
-    elif bin_style == 'slocum': # OSU Jesse Cusack (VMP)
+    elif bin_style == 'slocum': # OSU Jesse Cusack 
         d_bin = xarray.load_dataset(profiler.datafile)
         d_bin['depth'] = d_bin.depth.values
         # Time
@@ -176,7 +182,8 @@ def load(profiler, bin_style:str, in_missid:int=None):
             gdi = np.isfinite(d_bin[key])
             # In mission id?
             if in_missid is not None:
-                gdi &= (d_bin['missid'] == in_missid)
+                if 'missid' in d_bin:
+                    gdi &= (d_bin['missid'] == in_missid)
         try:
             set_profiler(profiler, key, d_bin, bin_style, gdi=gdi)#[key][gdi])
         except:
