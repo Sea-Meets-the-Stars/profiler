@@ -71,12 +71,12 @@ def load(profiler, bin_style:str, in_missid:int=None):
             d_bin = d['ctd']
         else:
             raise IOError(f'Bad binning style {bin_style} for {profiler.datafile}')
-        # Deal with OSU velocity
-        if profiler.adcp_on and 'v' in d_bin:
-            # OSU velocity
-            d_bin['udop'] = d_bin['u']
-            d_bin['vdop'] = d_bin['v']
-            embed(header='79 of binned')
+        # Deal with OSU velocity -- this is in development
+        #if profiler.adcp_on and 'v' in d_bin:
+        #    # OSU velocity
+        #    d_bin['udop'] = d_bin['u']
+        #    d_bin['vdop'] = d_bin['v']
+        #    embed(header='79 of binned')
     elif bin_style == 'cusack': # OSU Jesse Cusack (VMP)
         d_bin = xarray.load_dataset(profiler.datafile)
         d_bin['depth'] = d_bin.bin.values
