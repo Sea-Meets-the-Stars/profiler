@@ -238,7 +238,8 @@ class ProfilerData:
         Create a subset of the ProfilerData object based on the given profiles.
 
         Args:
-            profiles (np.ndarray): An array of profile indices to include in the subset.
+            profiles (np.ndarray): An array of profile indices to 
+            include in the subset.  Or a boolean array
 
         Returns:
             GliderData: A new ProfilerData object containing the subset of profiles.

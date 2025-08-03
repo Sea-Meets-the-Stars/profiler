@@ -7,7 +7,7 @@ import numpy as np
 from IPython import embed
 
 def calc_dist_offset(lons:np.ndarray, lats:np.ndarray,
-                     endpoints:tuple):
+                     endpoints:tuple, debug:bool=False):
     """ Calculate the distnace from shore and offset from a line
       for a given line 
 
@@ -17,6 +17,7 @@ def calc_dist_offset(lons:np.ndarray, lats:np.ndarray,
         endpoints (tuple, optional): endpoints of the "line". Defaults to None.
             lonendpts
             latendpts
+        debug (bool, optional): If True, print debug information. Defaults to False.
 
     Returns:
         tuple: dist, offset
@@ -25,10 +26,8 @@ def calc_dist_offset(lons:np.ndarray, lats:np.ndarray,
     """
 
     # Endpoints
-    if endpoints is None:
-        lonendpts, latendpts = line_endpoints(line)
-    else:
-        lonendpts, latendpts = endpoints
+    lonendpts, latendpts = endpoints
+    
     # Unpack
     lon0, lon1 = lonendpts
     lat0, lat1 = latendpts
@@ -49,6 +48,9 @@ def calc_dist_offset(lons:np.ndarray, lats:np.ndarray,
     # Calculate x, y of lon, lat relative to start of line
     dy = (lats-lat0)*deg2km;
     dx = np.cos(1/2*(lat1+lat0)*deg2rad)*(lons-lon0)*deg2km
+
+    if debug:
+        embed(header='calc_dist_offset debug')
 
     # Calculate dist, offset in new coordinate system by rotating
     z=dx+1j*dy
