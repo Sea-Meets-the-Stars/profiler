@@ -48,6 +48,7 @@ def calc_dist_offset(lons:np.ndarray, lats:np.ndarray,
     # Calculate x, y of lon, lat relative to start of line
     dy = (lats-lat0)*deg2km;
     dx = np.cos(1/2*(lat1+lat0)*deg2rad)*(lons-lon0)*deg2km
+    #dx = np.cos(lat0*deg2rad)*(lons-lon0)*deg2km
 
     if debug:
         embed(header='calc_dist_offset debug')

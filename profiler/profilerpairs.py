@@ -64,6 +64,7 @@ class ProfilerPairs:
                  max_dist:float=None, max_time:float=None,
                  from_scratch:bool=True, avoid_same_glider:bool=True,
                  randomize:bool=True,
+                 cen_latlon:tuple=None,
                  remove_nans:bool=False,
                  debug:bool=False):
         """ Object to generate and hold pairs of 
@@ -90,6 +91,14 @@ class ProfilerPairs:
         self.ry = None
         self.rxN = None
         self.ryN = None
+
+        # Optional center of the survey
+        if cen_latlon is not None:
+            self.cen_lat = cen_latlon[0]
+            self.cen_lon = cen_latlon[1]
+        else:
+            self.cen_lon = None
+            self.cen_lat = None
 
         # Velocity
         self.umag = None
@@ -156,8 +165,13 @@ class ProfilerPairs:
         self.min_lon = np.nanmin(lon)
         self.med_lon = np.nanmedian(lon)
         self.med_lat = np.nanmedian(lat)
-        latendpts = (self.med_lat-1., self.med_lat+1.)
-        lonendpts = (self.med_lon, self.med_lon)
+        if self.cen_lon is None:
+            self.cen_lon = self.med_lon
+        if self.cen_lat is None:
+            self.cen_lat = self.med_lat
+        # 
+        latendpts = (self.cen_lat-0.0001, self.cen_lat+0.0001)
+        lonendpts = (self.cen_lon, self.cen_lon)
 
         print(f"Using lonendpts: {lonendpts}")
         print(f"Using latendpts: {latendpts}")

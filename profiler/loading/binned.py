@@ -228,7 +228,7 @@ def load(profiler, bin_style:str, in_missid:int=None):
     #  distN is distance to the East from the median lon
     profiler.med_lon = np.median(profiler.lon)
     profiler.med_lat = np.median(profiler.lat)
-    latendpts = (profiler.med_lat-1., profiler.med_lat+1.)
+    latendpts = (profiler.med_lat-0.001, profiler.med_lat+0.001)
     lonendpts = (profiler.med_lon, profiler.med_lon)
 
     # distE
