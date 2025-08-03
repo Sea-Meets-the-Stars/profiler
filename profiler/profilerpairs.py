@@ -453,7 +453,7 @@ class ProfilerPairs:
             self.dv = v1-v0
 
             self.duL = self.rxN*self.du + self.ryN*self.dv
-            self.duT = self.ryN*self.du + self.rxN*self.dv
+            self.duT = self.ryN*self.du - self.rxN*self.dv
 
         # Other
         if 'dS' in variables:
