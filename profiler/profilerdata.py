@@ -32,6 +32,7 @@ class ProfilerData:
     lat = None
     lon = None
     time = None
+    profile_id = None
 
     # glider offset
     #dist = None
@@ -50,6 +51,7 @@ class ProfilerData:
 
     # I/O
     datafile:str = None
+
 
     # CTD -- Nprof, Ndepth
     s = None

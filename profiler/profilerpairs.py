@@ -232,6 +232,8 @@ class ProfilerPairs:
             setattr(pdata, 'missida', 
                     np.array([int(pdata.missid)]*pdata.time.size))
 
+        # Generate profile arrays
+
         # Time
         if max_time is not None:
             # Times

@@ -184,6 +184,8 @@ def load(profiler, bin_style:str, in_missid:int=None):
             if in_missid is not None:
                 if 'missid' in d_bin:
                     gdi &= (d_bin['missid'] == in_missid)
+            # IDs
+            profiler.profile_id = np.arange(len(d_bin[key]))[gdi]
         try:
             set_profiler(profiler, key, d_bin, bin_style, gdi=gdi)#[key][gdi])
         except:
