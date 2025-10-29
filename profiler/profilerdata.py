@@ -242,6 +242,7 @@ class ProfilerData:
         Args:
             profiles (np.ndarray): An array of profile indices to 
             include in the subset.  Or a boolean array
+            init (bool): Whether to initialize a new ProfilerData object.
 
         Returns:
             GliderData: A new ProfilerData object containing the subset of profiles.
@@ -249,9 +250,12 @@ class ProfilerData:
         # Init
         if init:
             pData = self.__class__(self.datafile, self.dataset)
+            # Meta
+            for key in np.unique(self.meta_keys):
+                setattr(pData, key, getattr(self, key))
         else:
             pData = self
-
+        
         # Cut on profiles
         for key in self.profile_arrays:
             setattr(pData, key, getattr(self, key)[profiles])
@@ -286,11 +290,14 @@ class ProfilerData:
         rstr_var = []
         rstr_var += ["  Variables:\n"]
         for key in self.depth_arrays:
-            rstr_var += [f"    {key}: {getattr(self, key).shape}\n"]
+            if getattr(self, key) is not None:
+                rstr_var += [f"    {key}: {getattr(self, key).shape}\n"]
         for key in self.profile_arrays:
-            rstr_var += [f"    {key}: {getattr(self, key).shape}\n"]
+            if getattr(self, key) is not None:
+                rstr_var += [f"    {key}: {getattr(self, key).shape}\n"]
         for key in self.profile_depth_arrays:
-            rstr_var += [f"    {key}: {getattr(self, key).shape}\n"]
+            if getattr(self, key) is not None:
+                rstr_var += [f"    {key}: {getattr(self, key).shape}\n"]
         #
         return rstr_var
 

@@ -229,8 +229,11 @@ class ProfilerPairs:
 
         # Generate missid arrays
         for pdata in self.pdata:
-            setattr(pdata, 'missida', 
+            try:
+                setattr(pdata, 'missida', 
                     np.array([int(pdata.missid)]*pdata.time.size))
+            except:
+                embed(header='236 of profilepairs')
 
         # Generate profile arrays
 
