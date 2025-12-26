@@ -202,27 +202,22 @@ def load(profiler, bin_style:str, in_missid:int=None):
             print("Warning: Could not set key", key)
             #embed(header='192 of binned')
 
-    # This breaks for Spray + ARCTERX Leg2
-    if profiler.in_field:
-        # Mission ID
-        key = 'missid'
-        #profiler.profile_arrays += [key]
-        #embed(header='53 of loading')
-        if in_missid is not None:
-            missid = in_missid
-        elif profiler.__class__.__name__ == 'EMApexData':
-            base = os.path.basename(profiler.datafile).split('.')[0]
-            missid = int(base.split('F')[1])
-        elif profiler.__class__.__name__ == 'SeagliderData':
-            base = os.path.basename(profiler.datafile).split('.')[0]
-            missid = int(base.split('_')[0][2:])
-        #elif profiler.__class__.__name__ in ['VMPData', 'TriaxusData']:
-        #    missid = in_missid
-        elif profiler.__class__.__name__ == 'SprayData':
-            missid = int(os.path.basename(profiler.datafile).split('_')[0])
-        else:
-            missid = int(os.path.basename(profiler.datafile).split('.')[0])
-        setattr(profiler, key, missid)
+    # Set Mission ID (always, not just for in_field)
+    key = 'missid'
+    if in_missid is not None:
+        missid = in_missid
+    elif profiler.__class__.__name__ == 'EMApexData':
+        base = os.path.basename(profiler.datafile).split('.')[0]
+        missid = int(base.split('F')[1])
+    elif profiler.__class__.__name__ == 'SeagliderData':
+        base = os.path.basename(profiler.datafile).split('.')[0]
+        missid = int(base.split('_')[0][2:])
+    elif profiler.__class__.__name__ == 'SprayData':
+        missid = int(os.path.basename(profiler.datafile).split('_')[0])
+    else:
+        missid = int(os.path.basename(profiler.datafile).split('.')[0])
+    setattr(profiler, key, missid)
+    if key not in profiler.meta_keys:
         profiler.meta_keys.append(key)
 
     # Generate dist and offset
@@ -246,9 +241,3 @@ def load(profiler, bin_style:str, in_missid:int=None):
     profiler.profile_arrays += [key]
     profiler.distN = distN
     profiler.data_keys.append(key)
-
-    # Mission ID
-    if in_missid is not None:
-        key = 'missid'
-        setattr(profiler, key, in_missid)
-        profiler.meta_keys.append(key)
