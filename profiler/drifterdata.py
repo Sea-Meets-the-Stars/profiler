@@ -124,4 +124,4 @@ class DrifterData(profilerdata.ProfilerData):
         list of DrifterData
         """
         ids = sorted(traj_df.ID.unique())
-        return [cls.from_trajectory(traj_df, meta, did) for did in ids]
+        return [cls.from_QG_trajectory(traj_df, meta, did) for did in ids]
