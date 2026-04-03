@@ -7,7 +7,7 @@ from profiler import profilerdata
 from IPython import embed
 
 # Meter-to-degree conversion (equatorial approximation)
-_M_PER_DEG = 111_000.0
+_M_PER_DEG = 111_120.0 # Matches calc_dist_offset()
 
 class SprayData(profilerdata.ADCPData):
     """
