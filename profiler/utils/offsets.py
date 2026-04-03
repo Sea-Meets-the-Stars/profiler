@@ -43,7 +43,7 @@ def calc_dist_offset(lons:np.ndarray, lats:np.ndarray,
     dxx = np.cos(1/2*(lat1+lat0)*deg2rad)*(lon1-lon0)
     theta = np.arctan2(dyy,dxx)
 
-    print(f"calc_dist_offset: theta={theta} rad, {theta*180/np.pi} deg")
+    #print(f"calc_dist_offset: theta={theta} rad, {theta*180/np.pi} deg")
 
     # Calculate x, y of lon, lat relative to start of line
     dy = (lats-lat0)*deg2km;
