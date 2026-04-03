@@ -1,8 +1,13 @@
 """ Simple Class to hold glider data """
 
+import numpy as np
+
 from profiler import profilerdata
 
 from IPython import embed
+
+# Meter-to-degree conversion (equatorial approximation)
+_M_PER_DEG = 111_000.0
 
 class SprayData(profilerdata.ADCPData):
     """
@@ -33,6 +38,87 @@ class SprayData(profilerdata.ADCPData):
         profilerdata.ADCPData.__init__(self, datafile, dataset)
 
 
+    @classmethod
+    def from_QG_glider(cls, glider_df, meta, missid):
+        """Build a SprayData instance from QG-sampled glider velocities.
+
+        Unlike DrifterData.from_QG_trajectory(), this uses the pre-sampled
+        u_qg, v_qg columns directly — no finite differencing.
+
+        Parameters
+        ----------
+        glider_df : pd.DataFrame
+            Glider velocity output with columns:
+            x, y, time, missid, x_m, y_m, u_qg, v_qg
+        meta : dict
+            Metadata dict (must contain 'dx', 'nx').
+        missid : int
+            Glider mission ID to extract.
+
+        Returns
+        -------
+        SprayData
+        """
+        # Extract this glider's rows, sorted by time
+        sub = glider_df[glider_df.missid == missid].sort_values('time')
+        x_m = sub.x_m.values
+        y_m = sub.y_m.values
+        times = sub.time.values.astype(float)
+        u = sub.u_qg.values
+        v = sub.v_qg.values
+
+        # Build the SprayData object (bypass __init__ which needs a datafile)
+        obj = cls.__new__(cls)
+        obj.datafile = None
+        obj.dataset = f'QG_glider_{int(missid)}'
+        obj.in_field = False
+        obj.has_adcp = True
+        obj.adcp_on = True
+
+        # Array layout declarations
+        obj.profile_arrays = ['time', 'lat', 'lon']
+        obj.depth_arrays = ['depth']
+        obj.profile_depth_arrays = ['udop', 'vdop']
+        obj.scalar_keys = []
+        obj.meta_keys = ['missid', 'platform', 'dataset']
+
+        # Profile arrays — one element per time step
+        # Add a tiny per-glider offset so ProfilerPairs dt>0 filter works
+        obj.time = times + missid * 1e-3
+        obj.lat = y_m / _M_PER_DEG
+        obj.lon = x_m / _M_PER_DEG
+
+        # Depth array — single surface level
+        obj.depth = np.array([0.0])
+
+        # Velocity arrays — shape (Ntime, 1) for the single depth level
+        # Use sampled QG velocities directly (no finite differencing)
+        obj.udop = u[:, np.newaxis]
+        obj.vdop = v[:, np.newaxis]
+
+        # Mission ID (used for avoid_same_glider in ProfilerPairs)
+        obj.missid = int(missid)
+
+        return obj
+
+    @classmethod
+    def all_from_QG_glider(cls, glider_df, meta):
+        """Build a list of SprayData objects, one per glider mission ID.
+
+        Parameters
+        ----------
+        glider_df : pd.DataFrame
+            Glider velocity output (all gliders).
+        meta : dict
+            Metadata dict.
+
+        Returns
+        -------
+        list of SprayData
+        """
+        ids = sorted(glider_df.missid.unique())
+        return [cls.from_QG_glider(glider_df, meta, mid) for mid in ids]
+
     def rstr_settings(self):
         """ Return the representation of the CTDData object """
         # Settings (adcp_on, in_field)
@@ -41,7 +127,7 @@ class SprayData(profilerdata.ADCPData):
         # More settings
         r_s.append(f"  In field? {self.in_field}")
         r_s.append(f"  ADCP on? {self.adcp_on}")
-        
+
         return r_s
 
 
