@@ -86,7 +86,7 @@ class SprayData(profilerdata.ADCPData):
         # Add a tiny per-glider offset so ProfilerPairs dt>0 filter works
         obj.time = times + missid * 1e-3
         obj.lat = y_m / _M_PER_DEG
-        obj.lon = x_m / _M_PER_DEG
+        obj.lon = x_m / _M_PER_DEG / np.cos(obj.lat * np.pi / 180.)
 
         # Depth array — single surface level
         obj.depth = np.array([0.0])

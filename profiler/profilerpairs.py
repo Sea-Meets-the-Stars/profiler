@@ -66,6 +66,7 @@ class ProfilerPairs:
                  randomize:bool=True,
                  cen_latlon:tuple=None,
                  remove_nans:bool=False,
+                 skip_dist:bool=False,
                  debug:bool=False):
         """ Object to generate and hold pairs of 
         measurements from profilers
@@ -116,7 +117,8 @@ class ProfilerPairs:
             self.expunge_NaN()
 
         # Calculate dists for the full survey
-        self.calc_dist()
+        if not skip_dist:
+            self.calc_dist()
 
         # Pair time
         self.generate_pairs(max_dist=max_dist, max_time=max_time,
