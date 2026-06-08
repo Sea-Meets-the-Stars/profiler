@@ -28,6 +28,7 @@ class TriaxusData(profilerdata.ADCPData):
 
         self.in_field = in_field
         self.base_key = 'bindata'
+        # TODO -- check which lat/lon is loaded (ship vs. Triaxus position)
         self.profile_arrays = ['lat', 'lon', 'time']
         self.depth_arrays = ['depth']
         self.profile_depth_arrays = ['s', 't', 'sigma']

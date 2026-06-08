@@ -16,7 +16,10 @@ Key Features
 -----------
 * Support for multiple oceanographic instruments including:
     * Spray Gliders
+    * Slocum Gliders
+    * Seagliders
     * Solo Floats  
+    * Alto Floats
     * EM-APEX Floats
     * VMPs
     * Triaxus

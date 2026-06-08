@@ -133,7 +133,7 @@ class SprayData(profilerdata.ADCPData):
 
 class SlocumData(profilerdata.ProfilerData):
     """
-    Class to hold a full, standard Slowcum glider
+    Class to hold a full, standard Slocum glider
     """
     platform = 'Slocum'
 

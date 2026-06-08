@@ -11,7 +11,7 @@ from IPython import embed
 
 class SoloData(profilerdata.ProfilerData):
     """
-    Class to hold a full, standard Spray
+    Class to hold a Solo float
     """
     platform = 'Solo'
 
@@ -77,7 +77,7 @@ class EMApexData(SoloData):
 
 class AltoData(SoloData):
     """
-    Class to hold a full, standard EM Apex
+    Class to hold a full, standard Alto
     """
     platform = 'Alto'
 

@@ -1,4 +1,4 @@
-""" Tests for VMPs """
+""" Tests for Triaxus """
 
 import glob
 import numpy as np
@@ -19,4 +19,3 @@ def test_triaxus():
     triaxus = triaxusdata.TriaxusData.from_binned_file(datafile, 'triaxus', 
                                        dataset, in_field=True,
                                        missid=50000)
-#embed(header='triaxus 19')

@@ -138,7 +138,7 @@ def bin_profilerdata(pdata:"ProfilerData",
     #            'profile_depth_arrays', 'scalar_keys']:
     #    darrays[key] = getattr(pdata, key)
 
-    print("FIX THIS HACK!!!!!!!!!!!!!!!!!!!!!!!!!")
+    # TODO -- The following is a hack to get the binned data into the profiler object
     tmp = pdata.darrays
     tmp['profile_depth_arrays'] = ['t', 's', 'theta', 'sigma', 'rho']
     #embed(header='137 of binning')
