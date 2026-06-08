@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+# Data
+*.json
+
+# docs
+docs/api/profiler.*
+sphinx_warnings.out
+
 # Distribution / packaging
 .Python
 build/
