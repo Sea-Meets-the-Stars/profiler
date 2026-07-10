@@ -610,7 +610,7 @@ class ProfilerPairs:
         # Correct me
         for ibin in range(Sn_dict['r'].size):
             Sn_dict['S2corr_'+f'{self.dlbls[1]}'][ibin] -= Sn_dict['S1_'+f'{self.dlbls[0]}'][ibin]**2
-            Sn_dict['S3corr_'+f'{self.dlbls[2]}'][ibin] -= 3.*Sn_dict['S1_'+f'{self.dlbls[0]}'][ibin]*Sn_dict['S2_'+f'{self.dlbls[1]}'][ibin] \
+            Sn_dict['S3corr_'+f'{self.dlbls[2]}'][ibin] += -3.*Sn_dict['S1_'+f'{self.dlbls[0]}'][ibin]*Sn_dict['S2_'+f'{self.dlbls[1]}'][ibin] \
                 + 2.*Sn_dict['S1_'+f'{self.dlbls[0]}'][ibin]**3
 
 
