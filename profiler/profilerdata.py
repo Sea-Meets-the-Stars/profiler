@@ -1,5 +1,7 @@
 """ Simple Class to hold data from a Profiler"""
 
+import copy
+
 import numpy as np
 import warnings
 
@@ -234,37 +236,46 @@ class ProfilerData:
         # Return
         return pData
 
-    def profile_subset(self, profiles: np.ndarray, 
+    def profile_subset(self, profiles: np.ndarray,
                        init:bool=True):
         """
         Create a subset of the ProfilerData object based on the given profiles.
 
+        This method is *non-destructive*: it always returns a new object and
+        never mutates the caller.  `init=True` rebuilds a fresh object from the
+        source file (heavier, but detached from the original); `init=False`
+        makes a lightweight shallow copy of the current object (cheap, no file
+        re-read) and subsets that copy.  Because the profile arrays are replaced
+        by fancy-indexed copies on the new object, the original object's arrays
+        are left untouched in either case.
+
         Args:
-            profiles (np.ndarray): An array of profile indices to 
-            include in the subset.  Or a boolean array
-            init (bool): Whether to initialize a new ProfilerData object.
+            profiles (np.ndarray): An array of profile indices to
+                include in the subset.  Or a boolean array.
+            init (bool): If True, initialize a new object from the source file;
+                if False, shallow-copy the current object (still non-destructive).
 
         Returns:
-            GliderData: A new ProfilerData object containing the subset of profiles.
+            ProfilerData: A new ProfilerData object containing the subset of
+                profiles.  The caller is never modified.
         """
-        # Init
+        # Build the target object (always a new object; never `self`)
         if init:
             pData = self.__class__(self.datafile, self.dataset)
             # Meta
             for key in np.unique(self.meta_keys):
                 setattr(pData, key, getattr(self, key))
         else:
-            pData = self
-        
+            # Shallow copy: cheap and non-destructive.  The subset assignments
+            # below rebind the profile arrays on the copy to new (indexed)
+            # arrays, so the original's arrays are never overwritten.
+            pData = copy.copy(self)
+
         # Cut on profiles
         for key in self.profile_arrays:
             setattr(pData, key, getattr(self, key)[profiles])
         for key in self.profile_depth_arrays:
-            #try:
             setattr(pData, key, getattr(self, key)[profiles])
-            #setattr(pData, key, getattr(self, key)[:, profiles])
-            #except IndexError:
-            #    embed(header=f"Error with {key} in profile_subset")
 
         # Return
         return pData
